@@ -303,45 +303,62 @@ $words = $data['words'] ?? [];
       btn.disabled = true;
       btn.textContent = '获取中...';
       try {
-        // 通过 Bing 词典接口获取信息（使用 json 格式，避免复杂 HTML 解析）
-        // 这里采用 Bing 词典的页面接口，若有更好的开放API可替换
-        const resp = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word));
-        if (!resp.ok) throw new Error('not found');
-        const data = await resp.json();
-        // 只取第一个释义
+        // 先用 dictionaryapi.dev 获取英文释义和音标
         let uk_phonetic = '';
         let uk_audio = '';
         let us_phonetic = '';
         let us_audio = '';
         let cn = '';
-        if (Array.isArray(data) && data.length > 0) {
-          const entry = data[0];
-          // 音标
-          if (entry.phonetics && entry.phonetics.length > 0) {
-            for (const ph of entry.phonetics) {
-              if (ph.audio && ph.audio.includes('uk.mp3')) {
-                uk_audio = ph.audio;
-                if (ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
-              }
-              if (ph.audio && ph.audio.includes('us.mp3')) {
-                us_audio = ph.audio;
-                if (ph.text) us_phonetic = ph.text.replace(/[\[\]]/g, '');
-              }
-              // 兜底
-              if (!uk_audio && ph.audio) uk_audio = ph.audio;
-              if (!uk_phonetic && ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
-            }
-          }
-          // 中文翻译（无，自动填英文释义）
-          if (entry.meanings && entry.meanings.length > 0) {
-            const defs = [];
-            for (const m of entry.meanings) {
-              if (m.definitions && m.definitions.length > 0) {
-                defs.push(m.definitions[0].definition);
+        // 先用 dictionaryapi.dev 获取英文释义和音标
+        let resp = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word));
+        if (resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const entry = data[0];
+            if (entry.phonetics && entry.phonetics.length > 0) {
+              for (const ph of entry.phonetics) {
+                if (ph.audio && ph.audio.includes('uk.mp3')) {
+                  uk_audio = ph.audio;
+                  if (ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
+                }
+                if (ph.audio && ph.audio.includes('us.mp3')) {
+                  us_audio = ph.audio;
+                  if (ph.text) us_phonetic = ph.text.replace(/[\[\]]/g, '');
+                }
+                if (!uk_audio && ph.audio) uk_audio = ph.audio;
+                if (!uk_phonetic && ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
               }
             }
-            cn = defs.join('; ');
+            // 英文释义
+            if (entry.meanings && entry.meanings.length > 0) {
+              const defs = [];
+              for (const m of entry.meanings) {
+                if (m.definitions && m.definitions.length > 0) {
+                  defs.push(m.definitions[0].definition);
+                }
+              }
+              cn = defs.join('; ');
+            }
           }
+        }
+        // 再用百度翻译API获取中文翻译（无需key，免费接口，适合小批量）
+        try {
+          let baiduResp = await fetch('https://fanyi.baidu.com/sug', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'kw=' + encodeURIComponent(word)
+          });
+          if (baiduResp.ok) {
+            let baiduData = await baiduResp.json();
+            if (baiduData && baiduData.data && baiduData.data.length > 0) {
+              // 取第一个翻译
+              cn = baiduData.data[0].v;
+            }
+          }
+        } catch (e) {
+          // 百度接口失败，忽略
         }
         // 填充到输入框
         const inputs = row.querySelectorAll('input');
@@ -419,6 +436,12 @@ $words = $data['words'] ?? [];
         <?php endforeach; ?>
       </table>
       <button type="button" class="add-row" onclick="addRow()">添加词汇</button>
+      <br><br>
+      <button type="submit" name="save" style="background:#388e3c;color:#fff;border:none;padding:0.7em 2em;border-radius:8px;">保存</button>
+    </form>
+  </div>
+</body>
+</html>
       <br><br>
       <button type="submit" name="save" style="background:#388e3c;color:#fff;border:none;padding:0.7em 2em;border-radius:8px;">保存</button>
     </form>

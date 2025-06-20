@@ -99,20 +99,32 @@ $font_size = $settings['font_size'] ?? 36;
       position:fixed;
       top:0;
       left:0;
-      width:100vw;
+      width:auto;
+      min-width:320px;
+      max-width:98vw;
       display:flex;
-      justify-content:space-between;
+      justify-content:flex-start;
       align-items:center;
       padding:1em 2em 1em 2em;
       background: rgba(232,245,233,0.95);
       box-shadow: 0 2px 8px rgba(56,142,60,0.07);
       z-index: 10;
+      /* 新增：防止超宽 */
+      right:auto;
     }
     .progress {
       color:#388e3c;
       font-size:1.1em;
       font-weight: 600;
       letter-spacing: 0.03em;
+      margin-left: 1em;
+      margin-right: 0.5em;
+      white-space:nowrap;
+      max-width: 60vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      vertical-align: middle;
     }
     .controls {
       position:fixed;
@@ -206,8 +218,8 @@ $font_size = $settings['font_size'] ?? 36;
     <?php endif; ?>
   </div>
   <div class="controls" id="controls" style="display:none;">
-    <button class="btn" onclick="location.href='/'">完成</button>
-    <button class="btn" onclick="restart()">再来一遍</button>
+    <button class="btn" id="done-btn" onclick="location.href='/'">完成</button>
+    <button class="btn" id="restart-btn" onclick="restart()">再来一遍</button>
     <button class="btn" id="pause-btn" onclick="togglePause()">暂停</button>
   </div>
   <div class="font-size-bar">
@@ -276,6 +288,75 @@ $font_size = $settings['font_size'] ?? 36;
       tick();
     }
 
+    function setControlsMode(mode) {
+      // mode: 'playing' | 'done'
+      const doneBtn = document.getElementById('done-btn');
+      const restartBtn = document.getElementById('restart-btn');
+      if (mode === 'playing') {
+        doneBtn.style.display = 'none';
+        restartBtn.style.display = 'none';
+      } else {
+        doneBtn.style.display = '';
+        restartBtn.style.display = '';
+      }
+    }
+
+    function showFinishTip() {
+      const wordDiv = document.getElementById('word');
+      wordDiv.innerHTML = '<span style="color:#fff;background:#43a047;padding:0.5em 1.5em;border-radius:16px;font-size:1.3em;box-shadow:0 2px 16px #43a04755;">🎉 已完成本轮词汇播放！</span>';
+      if (show_phonetic) document.getElementById('phonetic').textContent = '';
+      if (show_cn) document.getElementById('cn').textContent = '';
+    }
+
+    function getProgressText(idx) {
+      // idx: 当前播放到的序号（从0开始）
+      // 只统计已出现过的词汇数量
+      let seen = new Set();
+      for (let i = 0; i <= idx && i < seq.length; ++i) {
+        seen.add(seq[i]);
+      }
+      return `已读 ${seen.size} / ${words.length} 个`;
+    }
+
+    async function preloadAllAudio(cb) {
+      // 预加载所有音频
+      let audios = [];
+      let loaded = 0, total = 0;
+      let audioUrls = new Set();
+      for (const w of words) {
+        if (w.uk_audio) audioUrls.add(w.uk_audio);
+        if (w.us_audio) audioUrls.add(w.us_audio);
+      }
+      total = audioUrls.size;
+      if (total === 0) { cb && cb(); return; }
+      let tipDiv = document.getElementById('word');
+      tipDiv.innerHTML = '<span style="color:#fff;background:#388e3c;padding:0.5em 1.5em;border-radius:12px;font-size:1.1em;">正在预加载音频，请稍候...</span>';
+      let finished = false;
+      let done = () => {
+        if (!finished) {
+          finished = true;
+          tipDiv.innerHTML = '';
+          cb && cb();
+        }
+      };
+      let count = 0;
+      for (const url of audioUrls) {
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.src = url;
+        audio.oncanplaythrough = audio.onerror = function() {
+          loaded++;
+          if (loaded === total) setTimeout(done, 200);
+        };
+        // 触发加载
+        audio.load();
+        audios.push(audio);
+        count++;
+      }
+      // 超时兜底
+      setTimeout(done, 6000);
+    }
+
     function play(idx) {
       if (_pause) {
         _pendingPlay = () => play(idx);
@@ -287,19 +368,21 @@ $font_size = $settings['font_size'] ?? 36;
         if (show_phonetic) document.getElementById('phonetic').textContent = '';
         if (show_cn) document.getElementById('cn').textContent = '';
         document.getElementById('controls').style.display = '';
+        setControlsMode('done');
         return;
       }
       if (idx >= total) {
         document.getElementById('controls').style.display = '';
-        document.getElementById('progress').textContent = '已完成';
-        document.getElementById('word').textContent = '';
-        if (show_phonetic) document.getElementById('phonetic').textContent = '';
-        if (show_cn) document.getElementById('cn').textContent = '';
+        setControlsMode('done');
+        document.getElementById('progress').innerHTML = `<span style="color:#43a047;font-weight:bold;">已读 ${words.length} / ${words.length} 个</span>`;
+        showFinishTip();
         window.scrollTo(0,0);
         return;
       }
       let w = words[seq[idx]];
-      document.getElementById('progress').textContent = `第 ${idx+1} / ${total} 个`;
+      document.getElementById('controls').style.display = '';
+      setControlsMode('playing');
+      document.getElementById('progress').textContent = getProgressText(idx);
       document.getElementById('word').textContent = w.word;
       if (show_phonetic) document.getElementById('phonetic').textContent = w.uk_phonetic || w.us_phonetic || '';
       if (show_cn) document.getElementById('cn').textContent = w.cn || '';
@@ -323,28 +406,34 @@ $font_size = $settings['font_size'] ?? 36;
         }
       }
 
+      // 修复暂停后继续无法恢复播放
+      function nextStep() {
+        if (_pause) {
+          _pendingPlay = () => nextStep();
+        } else if (idx + 1 < total) {
+          play(idx+1);
+        } else {
+          document.getElementById('controls').style.display = '';
+          setControlsMode('done');
+          document.getElementById('progress').innerHTML = `<span style="color:#43a047;font-weight:bold;">已读 ${words.length} / ${words.length} 个</span>`;
+          showFinishTip();
+          window.scrollTo(0,0);
+        }
+      }
+
+      // 播放英音后等待，再播美音
       playAudio(w.uk_audio, function() {
-        playAudio(w.us_audio, function() {
-          _timer = setTimeout(function() {
-            if (_pause) {
-              _pendingPlay = () => play(idx+1);
-            } else if (idx + 1 < total) {
-              play(idx+1);
-            } else {
-              document.getElementById('controls').style.display = '';
-              document.getElementById('progress').textContent = '已完成';
-              document.getElementById('word').textContent = '';
-              if (show_phonetic) document.getElementById('phonetic').textContent = '';
-              if (show_cn) document.getElementById('cn').textContent = '';
-              window.scrollTo(0,0);
-            }
-          }, wait);
-        });
+        setTimeout(function() {
+          playAudio(w.us_audio, function() {
+            _timer = setTimeout(nextStep, wait);
+          });
+        }, wait);
       });
     }
 
     function restart() {
-      document.getElementById('controls').style.display = 'none';
+      document.getElementById('controls').style.display = '';
+      setControlsMode('playing');
       fontSize = initialFontSize;
       document.getElementById('font-size-range').value = fontSize;
       document.getElementById('font-size-val').textContent = fontSize;
@@ -393,7 +482,9 @@ $font_size = $settings['font_size'] ?? 36;
     // 初始化
     words = wordsRaw;
     buildSeq();
-    showCountdown(() => play(0));
+    preloadAllAudio(() => {
+      showCountdown(() => play(0));
+    });
   </script>
 </body>
 </html>
