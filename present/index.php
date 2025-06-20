@@ -1,5 +1,10 @@
 <?php
-$config = require __DIR__ . '/../config.php';
+if (!file_exists(__DIR__ . '/../config.json')) {
+  header('Location: /install.php');
+  exit;
+}
+$config = json_decode(file_get_contents(__DIR__ . '/../config.json'), true);
+
 $pdo = null;
 if ($config['db_type'] === 'mysql') {
   $dsn = "mysql:host={$config['mysql']['host']};dbname={$config['mysql']['db']};charset=utf8mb4";
@@ -7,7 +12,17 @@ if ($config['db_type'] === 'mysql') {
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
   ]);
 } else {
-  $dsn = "sqlite:{$config['sqlite']}";
+  $sqlite_path = $config['sqlite'];
+  if (!preg_match('/^([a-zA-Z]:)?[\/\\\\]/', $sqlite_path)) {
+    $sqlite_path = realpath(__DIR__ . '/../' . $sqlite_path);
+    if ($sqlite_path === false) {
+      $sqlite_path = __DIR__ . '/../' . $config['sqlite'];
+    }
+  }
+  if (!file_exists($sqlite_path)) {
+    die('SQLite 数据库文件不存在，请检查路径或重新初始化。');
+  }
+  $dsn = "sqlite:$sqlite_path";
   $pdo = new PDO($dsn, null, null, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
   ]);
@@ -37,23 +52,142 @@ $font_size = $settings['font_size'] ?? 36;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/@material/web@1.0.0/dist/material-web.min.css">
   <style>
-    html, body { height:100%; margin:0; padding:0; background: #f5fff5; color: #222;}
-    body { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh;}
-    #main { width:100vw; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;}
-    .word { font-size: <?= intval($font_size) ?>px; font-weight: bold; margin-bottom: 0.5em;}
-    .phonetic { font-size: <?= intval($font_size/2) ?>px; color: #388e3c; margin-bottom: 0.5em;}
-    .cn { font-size: <?= intval($font_size/2.2) ?>px; color: #666; margin-bottom: 1em;}
-    .topbar { position:fixed; top:0; left:0; width:100vw; display:flex; justify-content:space-between; align-items:center; padding:1em;}
-    .progress { color:#388e3c; font-size:1.1em;}
-    .controls { position:fixed; bottom:2em; left:0; width:100vw; display:flex; justify-content:center; gap:2em;}
-    .btn { background:#388e3c; color:#fff; border:none; border-radius:8px; padding:0.7em 2em; font-size:1.1em; cursor:pointer;}
-    .btn:hover { background:#2e7031; }
-    .fs-btn { background:transparent; border:none; color:#388e3c; font-size:1.5em; cursor:pointer;}
-    .font-size-bar { position:fixed; right:2em; bottom:2em; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(56,142,60,0.10); padding:0.5em 1em;}
+    html, body {
+      height:100%;
+      margin:0;
+      padding:0;
+      background: linear-gradient(135deg, #e8f5e9 0%, #f5fff5 100%);
+      color: #222;
+      font-family: system-ui, sans-serif;
+    }
+    body {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+    #main {
+      width:100vw;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+    .word {
+      font-size: <?= intval($font_size) ?>px;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      color: #388e3c;
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 8px rgba(56,142,60,0.08);
+    }
+    .phonetic {
+      font-size: <?= intval($font_size/2) ?>px;
+      color: #43a047;
+      margin-bottom: 0.5em;
+      letter-spacing: 0.02em;
+    }
+    .cn {
+      font-size: <?= intval($font_size/2.2) ?>px;
+      color: #666;
+      margin-bottom: 1em;
+      letter-spacing: 0.01em;
+    }
+    .topbar {
+      position:fixed;
+      top:0;
+      left:0;
+      width:100vw;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:1em 2em 1em 2em;
+      background: rgba(232,245,233,0.95);
+      box-shadow: 0 2px 8px rgba(56,142,60,0.07);
+      z-index: 10;
+    }
+    .progress {
+      color:#388e3c;
+      font-size:1.1em;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .controls {
+      position:fixed;
+      bottom:2em;
+      left:0;
+      width:100vw;
+      display:flex;
+      justify-content:center;
+      gap:2em;
+      z-index: 10;
+    }
+    .btn {
+      background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      padding:0.7em 2em;
+      font-size:1.1em;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor:pointer;
+      box-shadow: 0 2px 8px rgba(56,142,60,0.10);
+      transition: background .2s, box-shadow .2s, transform .2s;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+      box-shadow: 0 4px 16px rgba(56,142,60,0.18);
+      transform: scale(1.04);
+    }
+    .fs-btn {
+      background:transparent;
+      border:none;
+      color:#388e3c;
+      font-size:1.5em;
+      cursor:pointer;
+      transition: color .2s;
+    }
+    .fs-btn:hover {
+      color: #2e7031;
+    }
+    .font-size-bar {
+      position:fixed;
+      right:2em;
+      bottom:2em;
+      background:#fff;
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(56,142,60,0.10);
+      padding:0.5em 1em;
+      font-size: 1.05em;
+      color: #388e3c;
+      border: 1.5px solid #c8e6c9;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .font-size-bar input[type="range"] {
+      accent-color: #43a047;
+    }
+    @media (max-width: 700px) {
+      .topbar, .controls, .font-size-bar { padding-left: 0.5em; padding-right: 0.5em; }
+      .font-size-bar { right: 0.5em; bottom: 0.5em; }
+    }
     @media (prefers-color-scheme: dark) {
-      body, #main { background: #1a1f1a; color: #eee; }
-      .font-size-bar { background: #222; }
+      html, body, #main { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
+      .topbar { background: rgba(38,50,56,0.97); }
+      .word { color: #66bb6a; text-shadow: 0 2px 8px rgba(56,142,60,0.13);}
+      .phonetic { color: #81c784; }
       .cn { color: #bbb; }
+      .progress { color: #66bb6a; }
+      .font-size-bar { background: #232d23; color: #66bb6a; border: 1.5px solid #37474f; }
+      .btn { background: linear-gradient(90deg, #388e3c 60%, #43a047 100%); }
+      .btn:hover { background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);}
+      .fs-btn { color: #66bb6a; }
+      .fs-btn:hover { color: #43a047; }
     }
   </style>
 </head>
@@ -100,12 +234,18 @@ $font_size = $settings['font_size'] ?? 36;
     }
     function buildSeq() {
       seq = [];
+      // 先构造一轮的词序列
+      let oneRound = [];
+      let widx = Array.from({length: words.length}, (_,i)=>i);
+      if (shuffle) shuffleArr(widx);
+      for (let i of widx) {
+        for (let t = 0; t < repeat; ++t) oneRound.push(i);
+      }
+      // 再整体复制轮数
       for (let r = 0; r < rounds; ++r) {
-        let widx = Array.from({length: words.length}, (_,i)=>i);
-        if (shuffle) shuffleArr(widx);
-        for (let i of widx) {
-          for (let t = 0; t < repeat; ++t) seq.push(i);
-        }
+        let roundSeq = oneRound.slice();
+        if (shuffle && r > 0) shuffleArr(roundSeq); // 每轮可独立乱序
+        seq = seq.concat(roundSeq);
       }
       total = seq.length;
     }
@@ -132,31 +272,42 @@ $font_size = $settings['font_size'] ?? 36;
       document.getElementById('word').textContent = w.word;
       if (show_phonetic) document.getElementById('phonetic').textContent = w.uk_phonetic || w.us_phonetic || '';
       if (show_cn) document.getElementById('cn').textContent = w.cn || '';
-      // 播放英式音标和发音
-      if (w.uk_audio) {
-        let audio = new Audio(w.uk_audio);
-        audio.play();
-        audio.onended = function() {
-          // 播放美式音标和发音
-          if (w.us_audio) {
-            let audio2 = new Audio(w.us_audio);
-            audio2.play();
-            audio2.onended = function() {
-              setTimeout(()=>play(idx+1), wait);
-            }
-          } else {
-            setTimeout(()=>play(idx+1), wait);
-          }
+
+      // 记录已失败的音频URL，避免重复请求（仅本轮有效，restart时清空）
+      if (!window._audioErrorUrlSet) window._audioErrorUrlSet = new Set();
+
+      function playAudio(url, cb) {
+        if (!url || window._audioErrorUrlSet.has(url)) { cb && cb(); return; }
+        let audio = new Audio(url);
+        audio.onerror = function(e) {
+          if (!window._audioErrorLog) window._audioErrorLog = [];
+          window._audioErrorLog.push({url, time: Date.now()});
+          window._audioErrorUrlSet.add(url);
+          cb && cb();
+        };
+        audio.onended = function() { cb && cb(); };
+        try {
+          audio.play().catch(function(){ cb && cb(); });
+        } catch(e) {
+          cb && cb();
         }
-      } else if (w.us_audio) {
-        let audio2 = new Audio(w.us_audio);
-        audio2.play();
-        audio2.onended = function() {
-          setTimeout(()=>play(idx+1), wait);
-        }
-      } else {
-        setTimeout(()=>play(idx+1), wait);
       }
+      playAudio(w.uk_audio, function() {
+        playAudio(w.us_audio, function() {
+          setTimeout(function() {
+            if (idx + 1 < total) {
+              play(idx+1);
+            } else {
+              document.getElementById('controls').style.display = '';
+              document.getElementById('progress').textContent = '已完成';
+              document.getElementById('word').textContent = '';
+              if (show_phonetic) document.getElementById('phonetic').textContent = '';
+              if (show_cn) document.getElementById('cn').textContent = '';
+              window.scrollTo(0,0);
+            }
+          }, wait);
+        });
+      });
     }
     function restart() {
       document.getElementById('controls').style.display = 'none';
@@ -167,6 +318,8 @@ $font_size = $settings['font_size'] ?? 36;
       if (document.getElementById('phonetic')) document.getElementById('phonetic').style.fontSize = (fontSize/2) + 'px';
       if (document.getElementById('cn')) document.getElementById('cn').style.fontSize = (fontSize/2.2) + 'px';
       buildSeq();
+      // 重新开始时清空本轮的音频失败记录
+      window._audioErrorUrlSet = new Set();
       play(0);
     }
     // 字号调节
