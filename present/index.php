@@ -193,8 +193,8 @@ $font_size = $settings['font_size'] ?? 36;
 </head>
 <body>
   <div class="topbar">
+    <button class="fs-btn" id="fs-btn" title="全屏" style="margin-right:1em;">⛶</button>
     <span class="progress" id="progress"></span>
-    <button class="fs-btn" id="fs-btn" title="全屏">⛶</button>
   </div>
   <div id="main">
     <div class="word" id="word"></div>
@@ -208,6 +208,7 @@ $font_size = $settings['font_size'] ?? 36;
   <div class="controls" id="controls" style="display:none;">
     <button class="btn" onclick="location.href='/'">完成</button>
     <button class="btn" onclick="restart()">再来一遍</button>
+    <button class="btn" id="pause-btn" onclick="togglePause()">暂停</button>
   </div>
   <div class="font-size-bar">
     字号 <input type="range" min="18" max="120" value="<?= intval($font_size) ?>" id="font-size-range" style="vertical-align:middle;">
@@ -226,6 +227,11 @@ $font_size = $settings['font_size'] ?? 36;
     let initialFontSize = fontSize;
     let total = 0, idx = 0, round = 1;
     let seq = [];
+    let _pause = false;
+    let _timer = null;
+    let _pendingPlay = null;
+    let _countdownTimer = null;
+
     function shuffleArr(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -234,22 +240,47 @@ $font_size = $settings['font_size'] ?? 36;
     }
     function buildSeq() {
       seq = [];
-      // 先构造一轮的词序列
       let oneRound = [];
       let widx = Array.from({length: words.length}, (_,i)=>i);
       if (shuffle) shuffleArr(widx);
       for (let i of widx) {
         for (let t = 0; t < repeat; ++t) oneRound.push(i);
       }
-      // 再整体复制轮数
       for (let r = 0; r < rounds; ++r) {
         let roundSeq = oneRound.slice();
-        if (shuffle && r > 0) shuffleArr(roundSeq); // 每轮可独立乱序
+        if (shuffle && r > 0) shuffleArr(roundSeq);
         seq = seq.concat(roundSeq);
       }
       total = seq.length;
     }
+
+    function showCountdown(cb) {
+      let countdown = 3;
+      document.getElementById('controls').style.display = 'none';
+      document.getElementById('progress').textContent = '';
+      document.getElementById('word').textContent = '';
+      if (show_phonetic) document.getElementById('phonetic').textContent = '';
+      if (show_cn) document.getElementById('cn').textContent = '';
+      function tick() {
+        if (countdown > 0) {
+          document.getElementById('word').textContent = countdown;
+          countdown--;
+          _countdownTimer = setTimeout(tick, 1000);
+        } else {
+          document.getElementById('word').textContent = '';
+          if (show_phonetic) document.getElementById('phonetic').textContent = '';
+          if (show_cn) document.getElementById('cn').textContent = '';
+          cb && cb();
+        }
+      }
+      tick();
+    }
+
     function play(idx) {
+      if (_pause) {
+        _pendingPlay = () => play(idx);
+        return;
+      }
       if (words.length === 0) {
         document.getElementById('progress').textContent = '';
         document.getElementById('word').textContent = '（方案词汇为空）';
@@ -273,7 +304,6 @@ $font_size = $settings['font_size'] ?? 36;
       if (show_phonetic) document.getElementById('phonetic').textContent = w.uk_phonetic || w.us_phonetic || '';
       if (show_cn) document.getElementById('cn').textContent = w.cn || '';
 
-      // 记录已失败的音频URL，避免重复请求（仅本轮有效，restart时清空）
       if (!window._audioErrorUrlSet) window._audioErrorUrlSet = new Set();
 
       function playAudio(url, cb) {
@@ -292,10 +322,13 @@ $font_size = $settings['font_size'] ?? 36;
           cb && cb();
         }
       }
+
       playAudio(w.uk_audio, function() {
         playAudio(w.us_audio, function() {
-          setTimeout(function() {
-            if (idx + 1 < total) {
+          _timer = setTimeout(function() {
+            if (_pause) {
+              _pendingPlay = () => play(idx+1);
+            } else if (idx + 1 < total) {
               play(idx+1);
             } else {
               document.getElementById('controls').style.display = '';
@@ -309,6 +342,7 @@ $font_size = $settings['font_size'] ?? 36;
         });
       });
     }
+
     function restart() {
       document.getElementById('controls').style.display = 'none';
       fontSize = initialFontSize;
@@ -318,11 +352,30 @@ $font_size = $settings['font_size'] ?? 36;
       if (document.getElementById('phonetic')) document.getElementById('phonetic').style.fontSize = (fontSize/2) + 'px';
       if (document.getElementById('cn')) document.getElementById('cn').style.fontSize = (fontSize/2.2) + 'px';
       buildSeq();
-      // 重新开始时清空本轮的音频失败记录
       window._audioErrorUrlSet = new Set();
-      play(0);
+      _pause = false;
+      if (_timer) { clearTimeout(_timer); _timer = null; }
+      if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
+      document.getElementById('pause-btn').textContent = '暂停';
+      showCountdown(() => play(0));
     }
-    // 字号调节
+
+    function togglePause() {
+      _pause = !_pause;
+      let btn = document.getElementById('pause-btn');
+      if (_pause) {
+        btn.textContent = '继续';
+        if (_timer) { clearTimeout(_timer); _timer = null; }
+      } else {
+        btn.textContent = '暂停';
+        if (_pendingPlay) {
+          let fn = _pendingPlay;
+          _pendingPlay = null;
+          fn();
+        }
+      }
+    }
+
     document.getElementById('font-size-range').addEventListener('input', function() {
       fontSize = parseInt(this.value);
       document.getElementById('font-size-val').textContent = fontSize;
@@ -330,16 +383,17 @@ $font_size = $settings['font_size'] ?? 36;
       if (document.getElementById('phonetic')) document.getElementById('phonetic').style.fontSize = (fontSize/2) + 'px';
       if (document.getElementById('cn')) document.getElementById('cn').style.fontSize = (fontSize/2.2) + 'px';
     });
-    // 全屏
+
     document.getElementById('fs-btn').onclick = function() {
       let el = document.documentElement;
       if (!document.fullscreenElement) el.requestFullscreen();
       else document.exitFullscreen();
     };
+
     // 初始化
     words = wordsRaw;
     buildSeq();
-    play(0);
+    showCountdown(() => play(0));
   </script>
 </body>
 </html>
