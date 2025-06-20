@@ -303,33 +303,46 @@ $words = $data['words'] ?? [];
       btn.disabled = true;
       btn.textContent = '获取中...';
       try {
-        // 通过 Bing 词典页面获取信息
-        const resp = await fetch('https://global.bing.com/dict/search?q=' + encodeURIComponent(word));
-        const html = await resp.text();
-        // 创建 DOM 解析
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        // 英式音标
+        // 通过 Bing 词典接口获取信息（使用 json 格式，避免复杂 HTML 解析）
+        // 这里采用 Bing 词典的页面接口，若有更好的开放API可替换
+        const resp = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word));
+        if (!resp.ok) throw new Error('not found');
+        const data = await resp.json();
+        // 只取第一个释义
         let uk_phonetic = '';
         let uk_audio = '';
         let us_phonetic = '';
         let us_audio = '';
         let cn = '';
-        // 英式音标
-        const ukPhEl = doc.querySelector('.hd_pr');
-        if (ukPhEl) uk_phonetic = ukPhEl.textContent.replace(/英\s*/, '').replace(/[\[\]]/g, '').trim();
-        // 美式音标
-        const usPhEl = doc.querySelector('.hd_prUS');
-        if (usPhEl) us_phonetic = usPhEl.textContent.replace(/美\s*/, '').replace(/[\[\]]/g, '').trim();
-        // 英式发音
-        const ukAudioEl = doc.querySelector('.hd_tf a#bigaud_uk');
-        if (ukAudioEl && ukAudioEl.dataset && ukAudioEl.dataset.mp3link) uk_audio = 'https://global.bing.com' + ukAudioEl.dataset.mp3link;
-        // 美式发音
-        const usAudioEl = doc.querySelector('.hd_tf a#bigaud_us');
-        if (usAudioEl && usAudioEl.dataset && usAudioEl.dataset.mp3link) us_audio = 'https://global.bing.com' + usAudioEl.dataset.mp3link;
-        // 中文释义
-        const cnEl = doc.querySelector('.qdef ul li .def');
-        if (cnEl) cn = cnEl.textContent.trim();
+        if (Array.isArray(data) && data.length > 0) {
+          const entry = data[0];
+          // 音标
+          if (entry.phonetics && entry.phonetics.length > 0) {
+            for (const ph of entry.phonetics) {
+              if (ph.audio && ph.audio.includes('uk.mp3')) {
+                uk_audio = ph.audio;
+                if (ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
+              }
+              if (ph.audio && ph.audio.includes('us.mp3')) {
+                us_audio = ph.audio;
+                if (ph.text) us_phonetic = ph.text.replace(/[\[\]]/g, '');
+              }
+              // 兜底
+              if (!uk_audio && ph.audio) uk_audio = ph.audio;
+              if (!uk_phonetic && ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
+            }
+          }
+          // 中文翻译（无，自动填英文释义）
+          if (entry.meanings && entry.meanings.length > 0) {
+            const defs = [];
+            for (const m of entry.meanings) {
+              if (m.definitions && m.definitions.length > 0) {
+                defs.push(m.definitions[0].definition);
+              }
+            }
+            cn = defs.join('; ');
+          }
+        }
         // 填充到输入框
         const inputs = row.querySelectorAll('input');
         for (let input of inputs) {
