@@ -56,7 +56,7 @@ $font_size = $settings['font_size'] ?? 36;
       height:100%;
       margin:0;
       padding:0;
-      background: linear-gradient(135deg, #e8f5e9 0%, #f5fff5 100%);
+      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
       color: #222;
       font-family: system-ui, sans-serif;
     }
@@ -79,13 +79,13 @@ $font_size = $settings['font_size'] ?? 36;
       font-size: <?= intval($font_size) ?>px;
       font-weight: bold;
       margin-bottom: 0.5em;
-      color: #388e3c;
+      color: var(--primary-dark);
       letter-spacing: 0.04em;
-      text-shadow: 0 2px 8px rgba(56,142,60,0.08);
+      text-shadow: 0 2px 8px rgba(255,152,0,0.08);
     }
     .phonetic {
       font-size: <?= intval($font_size/2) ?>px;
-      color: #43a047;
+      color: var(--primary);
       margin-bottom: 0.5em;
       letter-spacing: 0.02em;
     }
@@ -98,23 +98,22 @@ $font_size = $settings['font_size'] ?? 36;
     .topbar {
       position:fixed;
       top:0;
-      left:0;
+      right:0;
+      left:auto;
       width:auto;
       min-width:320px;
       max-width:98vw;
       display:flex;
-      justify-content:flex-start;
+      justify-content:flex-end;
       align-items:center;
       padding:1em 2em 1em 2em;
-      background: rgba(232,245,233,0.95);
-      box-shadow: 0 2px 8px rgba(56,142,60,0.07);
+      background: rgba(255,235,205,0.97);
+      box-shadow: 0 2px 8px rgba(255,152,0,0.07);
       z-index: 10;
-      /* 新增：防止超宽 */
-      right:auto;
     }
     .progress {
-      color:#388e3c;
-      font-size:1.1em;
+      color: var(--primary-dark);
+      font-size:1.05em;
       font-weight: 600;
       letter-spacing: 0.03em;
       margin-left: 1em;
@@ -125,6 +124,42 @@ $font_size = $settings['font_size'] ?? 36;
       text-overflow: ellipsis;
       display: inline-block;
       vertical-align: middle;
+    }
+    .preload-tip {
+      font-size: 20px;
+      color: var(--on-primary);
+      background: var(--primary-dark);
+      padding: 0.4em 1.2em;
+      border-radius: 10px;
+      margin-top: 1em;
+      margin-bottom: 1em;
+      box-shadow: 0 2px 8px var(--primary-light);
+      display: inline-block;
+    }
+    .finish-tip {
+      font-size: 20px;
+      color: var(--on-primary);
+      background: var(--primary);
+      padding: 0.4em 1.2em;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px var(--primary-light);
+      display: inline-block;
+    }
+    .preload-bar {
+      width: 180px;
+      height: 8px;
+      background: #eee;
+      border-radius: 5px;
+      margin: 0.5em auto 0.2em auto;
+      overflow: hidden;
+      position: relative;
+      display: block;
+    }
+    .preload-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-dark) 60%, var(--primary-light) 100%);
+      border-radius: 5px;
+      transition: width 0.2s;
     }
     .controls {
       position:fixed;
@@ -137,8 +172,8 @@ $font_size = $settings['font_size'] ?? 36;
       z-index: 10;
     }
     .btn {
-      background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);
-      color:#fff;
+      background: var(--primary-dark);
+      color: var(--on-primary);
       border:none;
       border-radius:10px;
       padding:0.7em 2em;
@@ -146,24 +181,25 @@ $font_size = $settings['font_size'] ?? 36;
       font-weight: 600;
       letter-spacing: 0.04em;
       cursor:pointer;
-      box-shadow: 0 2px 8px rgba(56,142,60,0.10);
+      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
       transition: background .2s, box-shadow .2s, transform .2s;
     }
     .btn:hover {
-      background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
-      box-shadow: 0 4px 16px rgba(56,142,60,0.18);
+      background: var(--primary-light);
+      color: var(--on-surface);
+      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
       transform: scale(1.04);
     }
     .fs-btn {
       background:transparent;
       border:none;
-      color:#388e3c;
+      color: var(--primary-dark);
       font-size:1.5em;
       cursor:pointer;
       transition: color .2s;
     }
     .fs-btn:hover {
-      color: #2e7031;
+      color: var(--primary);
     }
     .font-size-bar {
       position:fixed;
@@ -171,18 +207,18 @@ $font_size = $settings['font_size'] ?? 36;
       bottom:2em;
       background:#fff;
       border-radius:8px;
-      box-shadow:0 2px 8px rgba(56,142,60,0.10);
+      box-shadow:0 2px 8px var(--primary-light);
       padding:0.5em 1em;
       font-size: 1.05em;
-      color: #388e3c;
-      border: 1.5px solid #c8e6c9;
+      color: var(--primary-dark);
+      border: 1.5px solid var(--primary-light);
       z-index: 10;
       display: flex;
       align-items: center;
       gap: 0.5em;
     }
     .font-size-bar input[type="range"] {
-      accent-color: #43a047;
+      accent-color: var(--primary);
     }
     @media (max-width: 700px) {
       .topbar, .controls, .font-size-bar { padding-left: 0.5em; padding-right: 0.5em; }
@@ -191,22 +227,24 @@ $font_size = $settings['font_size'] ?? 36;
     @media (prefers-color-scheme: dark) {
       html, body, #main { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
       .topbar { background: rgba(38,50,56,0.97); }
-      .word { color: #66bb6a; text-shadow: 0 2px 8px rgba(56,142,60,0.13);}
-      .phonetic { color: #81c784; }
+      .word { color: var(--primary); text-shadow: 0 2px 8px var(--primary-light);}
+      .phonetic { color: var(--primary-light); }
       .cn { color: #bbb; }
-      .progress { color: #66bb6a; }
-      .font-size-bar { background: #232d23; color: #66bb6a; border: 1.5px solid #37474f; }
-      .btn { background: linear-gradient(90deg, #388e3c 60%, #43a047 100%); }
-      .btn:hover { background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);}
-      .fs-btn { color: #66bb6a; }
-      .fs-btn:hover { color: #43a047; }
+      .progress { color: var(--primary); }
+      .font-size-bar { background: #232d23; color: var(--primary); border: 1.5px solid #37474f; }
+      .btn { background: var(--primary-dark); }
+      .btn:hover { background: var(--primary-light); color: var(--on-surface);}
+      .fs-btn { color: var(--primary-light); }
+      .fs-btn:hover { color: var(--primary); }
+      .preload-tip { background: var(--primary-dark); color: var(--on-primary); }
+      .finish-tip { background: var(--primary); color: var(--on-primary); }
     }
   </style>
 </head>
 <body>
   <div class="topbar">
-    <button class="fs-btn" id="fs-btn" title="全屏" style="margin-right:1em;">⛶</button>
     <span class="progress" id="progress"></span>
+    <button class="fs-btn" id="fs-btn" title="全屏" style="margin-left:1em;">⛶</button>
   </div>
   <div id="main">
     <div class="word" id="word"></div>
@@ -303,19 +341,17 @@ $font_size = $settings['font_size'] ?? 36;
 
     function showFinishTip() {
       const wordDiv = document.getElementById('word');
-      wordDiv.innerHTML = '<span style="color:#fff;background:#43a047;padding:0.5em 1.5em;border-radius:16px;font-size:1.3em;box-shadow:0 2px 16px #43a04755;">🎉 已完成本轮词汇播放！</span>';
+      wordDiv.innerHTML = '<span class="finish-tip">🎉 已完成本轮词汇播放！</span>';
       if (show_phonetic) document.getElementById('phonetic').textContent = '';
       if (show_cn) document.getElementById('cn').textContent = '';
     }
 
     function getProgressText(idx) {
-      // idx: 当前播放到的序号（从0开始）
-      // 只统计已出现过的词汇数量
       let seen = new Set();
       for (let i = 0; i <= idx && i < seq.length; ++i) {
         seen.add(seq[i]);
       }
-      return `已读 ${seen.size} / ${words.length} 个`;
+      return `已完成 ${seen.size} / ${words.length} 个`;
     }
 
     async function preloadAllAudio(cb) {
@@ -330,7 +366,7 @@ $font_size = $settings['font_size'] ?? 36;
       total = audioUrls.size;
       if (total === 0) { cb && cb(); return; }
       let tipDiv = document.getElementById('word');
-      tipDiv.innerHTML = '<span style="color:#fff;background:#388e3c;padding:0.5em 1.5em;border-radius:12px;font-size:1.1em;">正在预加载音频，请稍候...</span>';
+      tipDiv.innerHTML = '<span class="preload-tip">正在预加载音频，请稍候...</span><div class="preload-bar"><div class="preload-bar-inner" id="preload-bar-inner" style="width:0%"></div></div><div id="preload-bar-text" style="font-size:0.95em;color:orange;margin-top:0.2em;"></div>';
       let finished = false;
       let done = () => {
         if (!finished) {
@@ -346,14 +382,15 @@ $font_size = $settings['font_size'] ?? 36;
         audio.src = url;
         audio.oncanplaythrough = audio.onerror = function() {
           loaded++;
+          let percent = Math.round(loaded/total*100);
+          document.getElementById('preload-bar-inner').style.width = percent + '%';
+          document.getElementById('preload-bar-text').textContent = `已加载 ${loaded} / ${total}`;
           if (loaded === total) setTimeout(done, 200);
         };
-        // 触发加载
         audio.load();
         audios.push(audio);
         count++;
       }
-      // 超时兜底
       setTimeout(done, 6000);
     }
 
@@ -374,9 +411,11 @@ $font_size = $settings['font_size'] ?? 36;
       if (idx >= total) {
         document.getElementById('controls').style.display = '';
         setControlsMode('done');
-        document.getElementById('progress').innerHTML = `<span style="color:#43a047;font-weight:bold;">已读 ${words.length} / ${words.length} 个</span>`;
+        // 计数归零
+        document.getElementById('progress').innerHTML = `<span style="color:var(--primary);font-weight:bold;">已读 0 / ${words.length} 个</span>`;
         showFinishTip();
         window.scrollTo(0,0);
+        idx = 0;
         return;
       }
       let w = words[seq[idx]];
@@ -415,7 +454,7 @@ $font_size = $settings['font_size'] ?? 36;
         } else {
           document.getElementById('controls').style.display = '';
           setControlsMode('done');
-          document.getElementById('progress').innerHTML = `<span style="color:#43a047;font-weight:bold;">已读 ${words.length} / ${words.length} 个</span>`;
+          document.getElementById('progress').innerHTML = `<span style="color:var(--primary);font-weight:bold;">已读 0 / ${words.length} 个</span>`;
           showFinishTip();
           window.scrollTo(0,0);
         }
@@ -441,6 +480,7 @@ $font_size = $settings['font_size'] ?? 36;
       if (document.getElementById('phonetic')) document.getElementById('phonetic').style.fontSize = (fontSize/2) + 'px';
       if (document.getElementById('cn')) document.getElementById('cn').style.fontSize = (fontSize/2.2) + 'px';
       buildSeq();
+      idx = 0; // 计数归零
       window._audioErrorUrlSet = new Set();
       _pause = false;
       if (_timer) { clearTimeout(_timer); _timer = null; }

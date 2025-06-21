@@ -46,7 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($name) {
       $stmt = $pdo->prepare("INSERT INTO schemes (name, data, owner_id) VALUES (?, ?, ?)");
       $stmt->execute([$name, json_encode(['words'=>[], 'settings'=>[]]), $user['id']]);
-      $msg = '新增成功。';
+      $newId = $pdo->lastInsertId();
+      header("Location: scheme_edit.php?id=$newId");
+      exit;
     }
   } elseif ($action === 'del') {
     $id = intval($_POST['id'] ?? 0);
@@ -65,15 +67,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   } elseif ($action === 'copy') {
     $id = intval($_POST['id'] ?? 0);
-    if ($id) {
+    $newname = trim($_POST['newname'] ?? '');
+    if ($id && $newname) {
       $stmt = $pdo->prepare("SELECT * FROM schemes WHERE id=?");
       $stmt->execute([$id]);
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
       if ($row) {
-        $newname = $row['name'].'_副本';
         $stmt2 = $pdo->prepare("INSERT INTO schemes (name, data, owner_id) VALUES (?, ?, ?)");
         $stmt2->execute([$newname, $row['data'], $user['id']]);
-        $msg = '已复制。';
+        $newId = $pdo->lastInsertId();
+        header("Location: scheme_edit.php?id=$newId");
+        exit;
       }
     }
   } elseif ($action === 'edit') {
@@ -94,40 +98,131 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
   <meta charset="UTF-8">
   <title>方案管理 - NoWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/@material/web@1.0.0/dist/material-web.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
+    :root {
+      --primary: #ff9800;
+      --primary-dark: #c66900;
+      --primary-light: #ffd149;
+      --on-primary: #fff;
+      --surface: #fff;
+      --on-surface: #222;
+      --background: #f5f5f5;
+      --card: #fff;
+      --card-shadow: 0 2px 8px rgba(255,152,0,0.08);
+      --border-radius: 16px;
+      --nav-height: 64px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #ffb300;
+        --primary-dark: #c68400;
+        --primary-light: #ffe082;
+        --on-primary: #222;
+        --surface: #232323;
+        --on-surface: #eee;
+        --background: #181818;
+        --card: #232323;
+        --card-shadow: 0 2px 8px rgba(255,152,0,0.16);
+      }
+    }
     body {
-      background: linear-gradient(135deg, #e8f5e9 0%, #f5fff5 100%);
-      color: #222;
-      min-height: 100vh;
+      background: var(--background);
+      color: var(--on-surface);
       font-family: system-ui, sans-serif;
       margin: 0;
+      min-height: 100vh;
+    }
+    .top-app-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-height);
+      background: var(--primary);
+      color: var(--on-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
+      padding: 0 2vw;
+      font-family: 'Roboto', system-ui, sans-serif;
+    }
+    .top-app-bar .left {
+      font-size: 1.35em;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      user-select: none;
+    }
+    .top-app-bar .left .material-icons {
+      font-size: 1.3em;
+      vertical-align: middle;
+    }
+    .top-app-bar .center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 0;
+    }
+    .top-app-bar .right {
+      display: flex;
+      align-items: center;
+      gap: 1.2em;
+      font-size: 1em;
+      min-width: 120px;
+      justify-content: flex-end;
+    }
+    .top-app-bar .btn {
+      background: var(--primary-dark);
+      color: var(--on-primary);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5em 1.3em;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
+      transition: background .2s, box-shadow .2s;
+      outline: none;
+      text-decoration: none;
+    }
+    .top-app-bar .btn:hover {
+      background: var(--primary-light);
+      color: var(--on-surface);
     }
     .container {
-      max-width: 900px;
-      margin: 2rem auto;
-      background: #fff;
+      width: 80vw;
+      max-width: 1200px;
+      min-width: 320px;
+      margin: calc(var(--nav-height) + 2rem) auto 2rem auto;
+      background: var(--card);
       border-radius: 18px;
-      box-shadow: 0 4px 24px rgba(56,142,60,0.10);
+      box-shadow: var(--card-shadow);
       padding: 2.5rem 2rem 2rem 2rem;
       border: 1.5px solid #c8e6c9;
     }
     h2 {
-      color: #388e3c;
+      color: var(--primary-dark);
       letter-spacing: 0.05em;
       font-weight: 700;
       text-align: center;
       margin-bottom: 1.2em;
     }
     a {
-      color: #388e3c;
+      color: var(--primary-dark);
       text-decoration: underline;
       font-weight: 500;
       font-size: 1.05em;
       transition: color .2s;
     }
     a:hover {
-      color: #2e7031;
+      color: var(--primary);
       text-decoration: none;
     }
     .add-form {
@@ -146,13 +241,13 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       transition: border 0.2s;
     }
     .add-form input:focus {
-      border: 1.5px solid #388e3c;
+      border: 1.5px solid var(--primary-dark);
       outline: none;
       background: #fff;
     }
     .add-form button {
-      background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);
-      color: #fff;
+      background: var(--primary-dark);
+      color: var(--on-primary);
       border: none;
       border-radius: 10px;
       padding: 0.5em 1.5em;
@@ -160,104 +255,118 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       font-weight: 600;
       letter-spacing: 0.04em;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(56,142,60,0.10);
+      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
       transition: background .2s, box-shadow .2s, transform .2s;
     }
     .add-form button:hover {
-      background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
-      box-shadow: 0 4px 16px rgba(56,142,60,0.18);
+      background: var(--primary-light);
+      color: var(--on-surface);
+      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
       transform: scale(1.04);
     }
-    .schemes-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      justify-content: flex-start;
+    table.schemes-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5em;
+      background: var(--card);
     }
-    .scheme-card {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(56,142,60,0.10);
-      padding: 1.5rem;
-      min-width: 240px;
-      max-width: 320px;
-      flex: 1 1 240px;
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 1rem;
-      border: 1.5px solid #c8e6c9;
-      position: relative;
-      overflow: hidden;
-      transition: box-shadow .2s, transform .2s, border .2s;
+    table.schemes-table th, table.schemes-table td {
+      border: 1px solid #e0f2f1;
+      padding: 0.7em 0.8em;
+      text-align: left;
+      font-size: 1.05em;
     }
-    .scheme-card::before {
-      content: "";
-      position: absolute;
-      left: -30px;
-      top: -30px;
-      width: 60px;
-      height: 60px;
-      background: radial-gradient(circle, #c8e6c9 0%, transparent 70%);
-      z-index: 0;
+    table.schemes-table th {
+      background: #f5fff5;
+      color: var(--primary-dark);
+      font-weight: 700;
     }
-    .scheme-card:hover {
-      box-shadow: 0 8px 32px rgba(56,142,60,0.18);
-      transform: translateY(-3px) scale(1.018);
-      border-color: #43a047;
-    }
-    .scheme-title {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #388e3c;
-      margin-bottom: 0.5em;
-      letter-spacing: 0.02em;
-      z-index: 1;
-      position: relative;
-    }
-    .scheme-actions {
-      z-index: 1;
-      position: relative;
-    }
-    .scheme-actions button, .scheme-actions input[type="text"] {
-      margin-right: 0.5em;
-      padding: 0.3em 0.8em;
-      border-radius: 6px;
-      border: 1px solid #c8e6c9;
-      background: #fff;
-      color: #388e3c;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .2s, color .2s;
-      font-size: 0.98em;
-    }
-    .scheme-actions button:hover, .scheme-actions input[type="text"]:focus {
-      background: #e8f5e9;
-      color: #2e7031;
-      border-color: #43a047;
-    }
-    .scheme-actions input[type="text"] {
-      width: 6em;
-      margin-right: 0.3em;
+    table.schemes-table tr:hover td {
       background: #f9fff9;
     }
-    .scheme-actions input[type="text"]:focus {
-      background: #fff;
+    .scheme-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      align-items: center;
     }
-    @media (max-width: 700px) {
-      .schemes-list { flex-direction: column; gap: 1.2rem; }
-      .container { padding: 1.2rem 0; }
+    .scheme-actions button {
+      background: var(--primary-dark);
+      color: var(--on-primary);
+      border: none;
+      border-radius: 8px;
+      padding: 0.3em 1.1em;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
+      transition: background .2s, box-shadow .2s, transform .2s;
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+    .scheme-actions button:hover {
+      background: var(--primary-light);
+      color: var(--on-surface);
+      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
+      transform: scale(1.04);
+    }
+    @media (max-width: 900px) {
+      .container { width: 99vw; padding: 1.2rem 0.2rem; }
+      table.schemes-table th, table.schemes-table td { font-size: 0.98em; }
     }
     @media (prefers-color-scheme: dark) {
       body { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
+      .top-app-bar { background: #263238; }
       .container { background: #232d23; border: 1.5px solid #37474f; }
-      .scheme-card { background: #232d23; border: 1.5px solid #37474f; }
-      .scheme-title { color: #66bb6a; }
-      .scheme-actions button, .scheme-actions input[type="text"] { background: #232d23; color: #66bb6a; border: 1px solid #37474f; }
-      .scheme-actions button:hover, .scheme-actions input[type="text"]:focus { background: #263238; color: #43a047; border-color: #43a047; }
+      table.schemes-table { background: #232d23; }
+      table.schemes-table th { background: #263238; color: #ffb300; }
+      table.schemes-table td { color: #eee; }
+      .scheme-actions button { background: #37474f; color: #ffb300; }
+      .scheme-actions button:hover { background: #ffb300; color: #232323; }
     }
   </style>
+  <script>
+    function renameScheme(id, oldName) {
+      const newName = prompt('请输入新方案名：', oldName);
+      if (newName && newName.trim() && newName !== oldName) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.style.display = 'none';
+        form.innerHTML = `<input name=\"action\" value=\"rename\"><input name=\"id\" value=\"${id}\"><input name=\"newname\" value=\"${newName}\">`;
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+    function copyScheme(id, oldName) {
+      const newName = prompt('请输入新方案名（复制）：', oldName + '_副本');
+      if (newName && newName.trim()) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.style.display = 'none';
+        form.innerHTML = `<input name=\"action\" value=\"copy\"><input name=\"id\" value=\"${id}\"><input name=\"newname\" value=\"${newName}\">`;
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
 </head>
 <body>
+  <div class="top-app-bar">
+    <div class="left">
+      <span class="material-icons">library_books</span>
+      方案管理 - NoWord
+    </div>
+    <div class="center">
+      <a href="/admin/index.php" class="btn"><span class="material-icons">admin_panel_settings</span>后台首页</a>
+      <span style="display:inline-block;width:1.2em;"></span>
+      <a href="/" class="btn"><span class="material-icons">home</span>回到首页</a>
+    </div>
+    <div class="right">
+      <span style="display:flex;align-items:center;gap:0.2em;"><span class="material-icons" style="font-size:1.1em;">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
+      <a href="/logout.php" class="btn"><span class="material-icons">logout</span>退出登录</a>
+    </div>
+  </div>
   <div class="container">
     <h2>方案管理</h2>
     <a href="index.php">← 返回后台</a>
@@ -267,37 +376,37 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       <input type="text" name="name" placeholder="新方案名称" required>
       <button type="submit">新增方案</button>
     </form>
-    <div class="schemes-list">
+    <table class="schemes-table">
+      <thead>
+        <tr>
+          <th style="width:40%;">方案名称</th>
+          <th style="width:20%;">创建时间</th>
+          <th style="width:40%;">操作</th>
+        </tr>
+      </thead>
+      <tbody>
       <?php foreach ($schemes as $s): ?>
-      <div class="scheme-card">
-        <div class="scheme-title"><?= htmlspecialchars($s['name']) ?></div>
-        <div style="font-size:0.95em;color:#666;margin-bottom:1em;">创建于 <?= htmlspecialchars($s['created_at']) ?></div>
-        <div class="scheme-actions">
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="id" value="<?= $s['id'] ?>">
-            <button type="submit">编辑</button>
-          </form>
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="rename">
-            <input type="hidden" name="id" value="<?= $s['id'] ?>">
-            <input type="text" name="newname" placeholder="重命名">
-            <button type="submit">重命名</button>
-          </form>
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="copy">
-            <input type="hidden" name="id" value="<?= $s['id'] ?>">
-            <button type="submit">复制</button>
-          </form>
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="del">
-            <input type="hidden" name="id" value="<?= $s['id'] ?>">
-            <button type="submit" onclick="return confirm('确定删除？')">删除</button>
-          </form>
-        </div>
-      </div>
+        <tr>
+          <td><?= htmlspecialchars($s['name']) ?></td>
+          <td><?= htmlspecialchars($s['created_at']) ?></td>
+          <td class="scheme-actions">
+            <form method="post" style="display:inline;">
+              <input type="hidden" name="action" value="edit">
+              <input type="hidden" name="id" value="<?= $s['id'] ?>">
+              <button type="submit"><span class="material-icons" style="font-size:1em;vertical-align:middle;">edit</span>编辑</button>
+            </form>
+            <button type="button" onclick="renameScheme(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>')"><span class="material-icons" style="font-size:1em;vertical-align:middle;">drive_file_rename_outline</span>重命名</button>
+            <button type="button" onclick="copyScheme(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>')"><span class="material-icons" style="font-size:1em;vertical-align:middle;">content_copy</span>复制</button>
+            <form method="post" style="display:inline;">
+              <input type="hidden" name="action" value="del">
+              <input type="hidden" name="id" value="<?= $s['id'] ?>">
+              <button type="submit" onclick="return confirm('确定删除？')"><span class="material-icons" style="font-size:1em;vertical-align:middle;">delete</span>删除</button>
+            </form>
+          </td>
+        </tr>
       <?php endforeach; ?>
-    </div>
+      </tbody>
+    </table>
   </div>
 </body>
 </html>
