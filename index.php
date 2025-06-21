@@ -310,9 +310,12 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
     // 获取一言
     async function setHitokoto() {
       try {
-        let resp = await fetch('https://v1.hitokoto.cn/?encode=text');
-        let text = await resp.text();
-        document.getElementById('bing-header-mask').textContent = text;
+        let resp = await fetch('https://v1.hitokoto.cn/?encode=json');
+        let data = await resp.json();
+        let text = data.hitokoto;
+        let from = data.from ? `—— ${data.from}` : '';
+        let from_who = data.from_who ? ` · ${data.from_who}` : '';
+        document.getElementById('bing-header-mask').textContent = text + (from || from_who ? `\n${from}${from_who}` : '');
       } catch(e) {
         document.getElementById('bing-header-mask').textContent = '欢迎使用 NoWord!';
       }

@@ -137,7 +137,7 @@ $font_size = $settings['font_size'] ?? 36;
       display: inline-block;
     }
     .finish-tip {
-      font-size: 20px;
+      font-size: 28px;
       color: var(--on-primary);
       background: var(--primary);
       padding: 0.4em 1.2em;
@@ -411,11 +411,12 @@ $font_size = $settings['font_size'] ?? 36;
       if (idx >= total) {
         document.getElementById('controls').style.display = '';
         setControlsMode('done');
-        // 计数归零
         document.getElementById('progress').innerHTML = `<span style="color:var(--primary);font-weight:bold;">已读 0 / ${words.length} 个</span>`;
         showFinishTip();
         window.scrollTo(0,0);
         idx = 0;
+        // 重新buildSeq以便下一轮计数归零
+        buildSeq();
         return;
       }
       let w = words[seq[idx]];
