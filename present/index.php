@@ -511,10 +511,14 @@ $font_size = $settings['font_size'] ?? 36;
       }
       setTimeout(done, 6000);
     }
-    function startRound() {
+    function startRound(isFirst) {
       idx = 0;
       buildSeq();
-      showCountdown(() => play(0));
+      if (isFirst) {
+        showCountdown(() => play(0));
+      } else {
+        play(0);
+      }
     }
     function play(idx) {
       if (_pause) {
@@ -539,6 +543,7 @@ $font_size = $settings['font_size'] ?? 36;
           setTimeout(() => {
             idx = 0;
             buildSeq();
+            // 不是第一轮，直接进入
             play(0);
           }, 300);
         } else {
@@ -623,8 +628,7 @@ $font_size = $settings['font_size'] ?? 36;
       if (_timer) { clearTimeout(_timer); _timer = null; }
       if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
       document.getElementById('pause-btn').textContent = '暂停';
-      buildSeq();
-      play(0);
+      startRound(true);
     }
     function togglePause() {
       _pause = !_pause;
@@ -657,8 +661,7 @@ $font_size = $settings['font_size'] ?? 36;
     words = wordsRaw;
     roundCount = 0;
     preloadAllAudio(() => {
-      buildSeq();
-      play(0);
+      startRound(true);
     });
   </script>
 </body>
