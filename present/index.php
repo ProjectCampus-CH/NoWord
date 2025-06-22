@@ -82,18 +82,86 @@ $font_size = $settings['font_size'] ?? 36;
       color: var(--primary-dark);
       letter-spacing: 0.04em;
       text-shadow: 0 2px 8px rgba(255,152,0,0.08);
+      transition: font-size 0.3s, color 0.3s, text-shadow 0.3s;
+      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
     }
     .phonetic {
       font-size: <?= intval($font_size/2) ?>px;
       color: var(--primary);
       margin-bottom: 0.5em;
       letter-spacing: 0.02em;
+      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
     }
     .cn {
       font-size: <?= intval($font_size/2.2) ?>px;
       color: #666;
       margin-bottom: 1em;
       letter-spacing: 0.01em;
+      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
+    }
+    .progress {
+      color: var(--primary-dark);
+      font-size:1.1em;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      margin-left: 1em;
+      margin-right: 0.5em;
+      white-space:nowrap;
+      max-width: 60vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      vertical-align: middle;
+      transition: color 0.3s;
+      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
+    }
+    .preload-tip {
+      font-size: 20px;
+      color: var(--on-primary);
+      background: var(--primary-dark);
+      padding: 0.4em 1.2em;
+      border-radius: 10px;
+      margin-top: 1em;
+      margin-bottom: 1em;
+      box-shadow: 0 2px 8px var(--primary-light);
+      display: inline-block;
+      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
+    }
+    .finish-tip {
+      font-size: 32px;
+      color: var(--on-primary);
+      background: var(--primary);
+      padding: 0.5em 1.5em;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px var(--primary-light);
+      display: inline-block;
+      animation: fadeInScale 0.7s cubic-bezier(.4,2,.6,1) both, pulse 1.2s infinite alternate;
+    }
+    @keyframes fadeInScale {
+      0% { opacity: 0; transform: scale(0.7); }
+      80% { opacity: 1; transform: scale(1.08); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 2px 16px var(--primary-light); }
+      100% { box-shadow: 0 6px 32px var(--primary); }
+    }
+    .preload-bar {
+      width: 180px;
+      height: 8px;
+      background: #eee;
+      border-radius: 5px;
+      margin: 0.5em auto 0.2em auto;
+      overflow: hidden;
+      position: relative;
+      display: block;
+      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
+    }
+    .preload-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-dark) 60%, var(--primary-light) 100%);
+      border-radius: 5px;
+      transition: width 0.2s;
     }
     .topbar {
       position:fixed;
@@ -110,56 +178,6 @@ $font_size = $settings['font_size'] ?? 36;
       background: rgba(255,235,205,0.97);
       box-shadow: 0 2px 8px rgba(255,152,0,0.07);
       z-index: 10;
-    }
-    .progress {
-      color: var(--primary-dark);
-      font-size:1.05em;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      margin-left: 1em;
-      margin-right: 0.5em;
-      white-space:nowrap;
-      max-width: 60vw;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .preload-tip {
-      font-size: 20px;
-      color: var(--on-primary);
-      background: var(--primary-dark);
-      padding: 0.4em 1.2em;
-      border-radius: 10px;
-      margin-top: 1em;
-      margin-bottom: 1em;
-      box-shadow: 0 2px 8px var(--primary-light);
-      display: inline-block;
-    }
-    .finish-tip {
-      font-size: 28px;
-      color: var(--on-primary);
-      background: var(--primary);
-      padding: 0.4em 1.2em;
-      border-radius: 12px;
-      box-shadow: 0 2px 16px var(--primary-light);
-      display: inline-block;
-    }
-    .preload-bar {
-      width: 180px;
-      height: 8px;
-      background: #eee;
-      border-radius: 5px;
-      margin: 0.5em auto 0.2em auto;
-      overflow: hidden;
-      position: relative;
-      display: block;
-    }
-    .preload-bar-inner {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary-dark) 60%, var(--primary-light) 100%);
-      border-radius: 5px;
-      transition: width 0.2s;
     }
     .controls {
       position:fixed;
@@ -219,25 +237,134 @@ $font_size = $settings['font_size'] ?? 36;
     }
     .font-size-bar input[type="range"] {
       accent-color: var(--primary);
+      height: 4px;
+      border-radius: 3px;
+      outline: none;
+      background: #ffe0b2;
+      margin: 0 0.5em;
+      width: 120px;
+      transition: background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
     }
-    @media (max-width: 700px) {
-      .topbar, .controls, .font-size-bar { padding-left: 0.5em; padding-right: 0.5em; }
-      .font-size-bar { right: 0.5em; bottom: 0.5em; }
+    .font-size-bar input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: -7px;
+      /* 使滑块垂直居中 */
+      border-radius: 50%;
+      background: var(--primary-dark);
+      box-shadow: 0 2px 8px var(--primary-light);
+      cursor: pointer;
+      border: 2px solid #fff;
+      transition: background 0.2s;
+    }
+    .font-size-bar input[type="range"]:hover::-webkit-slider-thumb {
+      background: var(--primary);
+    }
+    .font-size-bar input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 3px;
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]::-ms-fill-lower {
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]::-ms-fill-upper {
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+    .font-size-bar input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary-dark);
+      box-shadow: 0 2px 8px var(--primary-light);
+      cursor: pointer;
+      border: 2px solid #fff;
+      transition: background 0.2s;
+    }
+    .font-size-bar input[type="range"]:hover::-moz-range-thumb {
+      background: var(--primary);
+    }
+    .font-size-bar input[type="range"]::-moz-range-track {
+      height: 4px;
+      border-radius: 3px;
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]::-ms-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary-dark);
+      box-shadow: 0 2px 8px var(--primary-light);
+      cursor: pointer;
+      border: 2px solid #fff;
+      transition: background 0.2s;
+    }
+    .font-size-bar input[type="range"]:hover::-ms-thumb {
+      background: var(--primary);
+    }
+    .font-size-bar input[type="range"]::-ms-fill-lower,
+    .font-size-bar input[type="range"]::-ms-fill-upper {
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]:focus::-ms-fill-lower {
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]:focus::-ms-fill-upper {
+      background: #ffe0b2;
+    }
+    .font-size-bar input[type="range"]::-ms-tooltip {
+      display: none;
+    }
+    .font-size-bar input[type="range"]:focus {
+      outline: none;
+    }
+    /* 兼容Firefox */
+    .font-size-bar input[type="range"] {
+      background: #ffe0b2;
     }
     @media (prefers-color-scheme: dark) {
-      html, body, #main { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
-      .topbar { background: rgba(38,50,56,0.97); }
-      .word { color: var(--primary); text-shadow: 0 2px 8px var(--primary-light);}
-      .phonetic { color: var(--primary-light); }
-      .cn { color: #bbb; }
-      .progress { color: var(--primary); }
-      .font-size-bar { background: #232d23; color: var(--primary); border: 1.5px solid #37474f; }
-      .btn { background: var(--primary-dark); }
-      .btn:hover { background: var(--primary-light); color: var(--on-surface);}
-      .fs-btn { color: var(--primary-light); }
-      .fs-btn:hover { color: var(--primary); }
-      .preload-tip { background: var(--primary-dark); color: var(--on-primary); }
-      .finish-tip { background: var(--primary); color: var(--on-primary); }
+      .font-size-bar input[type="range"] {
+        background: #37474f;
+      }
+      .font-size-bar input[type="range"]::-webkit-slider-thumb {
+        background: #ffb300;
+        border: 2px solid #232323;
+      }
+      .font-size-bar input[type="range"]:hover::-webkit-slider-thumb {
+        background: #ffd149;
+      }
+      .font-size-bar input[type="range"]::-webkit-slider-runnable-track {
+        background: #37474f;
+      }
+      .font-size-bar input[type="range"]::-moz-range-thumb {
+        background: #ffb300;
+        border: 2px solid #232323;
+      }
+      .font-size-bar input[type="range"]:hover::-moz-range-thumb {
+        background: #ffd149;
+      }
+      .font-size-bar input[type="range"]::-moz-range-track {
+        background: #37474f;
+      }
+      .font-size-bar input[type="range"]::-ms-thumb {
+        background: #ffb300;
+        border: 2px solid #232323;
+      }
+      .font-size-bar input[type="range"]:hover::-ms-thumb {
+        background: #ffd149;
+      }
+      .font-size-bar input[type="range"]::-ms-fill-lower,
+      .font-size-bar input[type="range"]::-ms-fill-upper {
+        background: #37474f;
+      }
     }
   </style>
 </head>
@@ -275,12 +402,13 @@ $font_size = $settings['font_size'] ?? 36;
     let shuffle = <?= $shuffle ? 'true' : 'false' ?>;
     let fontSize = <?= intval($font_size) ?>;
     let initialFontSize = fontSize;
-    let total = 0, idx = 0, round = 1;
+    let total = 0, idx = 0;
     let seq = [];
     let _pause = false;
     let _timer = null;
     let _pendingPlay = null;
     let _countdownTimer = null;
+    let roundCount = 0;
 
     function shuffleArr(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
@@ -296,14 +424,9 @@ $font_size = $settings['font_size'] ?? 36;
       for (let i of widx) {
         for (let t = 0; t < repeat; ++t) oneRound.push(i);
       }
-      for (let r = 0; r < rounds; ++r) {
-        let roundSeq = oneRound.slice();
-        if (shuffle && r > 0) shuffleArr(roundSeq);
-        seq = seq.concat(roundSeq);
-      }
+      seq = oneRound;
       total = seq.length;
     }
-
     function showCountdown(cb) {
       let countdown = 3;
       document.getElementById('controls').style.display = 'none';
@@ -314,6 +437,7 @@ $font_size = $settings['font_size'] ?? 36;
       function tick() {
         if (countdown > 0) {
           document.getElementById('word').textContent = countdown;
+          document.getElementById('word').classList.add('word');
           countdown--;
           _countdownTimer = setTimeout(tick, 1000);
         } else {
@@ -325,9 +449,7 @@ $font_size = $settings['font_size'] ?? 36;
       }
       tick();
     }
-
     function setControlsMode(mode) {
-      // mode: 'playing' | 'done'
       const doneBtn = document.getElementById('done-btn');
       const restartBtn = document.getElementById('restart-btn');
       if (mode === 'playing') {
@@ -338,14 +460,12 @@ $font_size = $settings['font_size'] ?? 36;
         restartBtn.style.display = '';
       }
     }
-
     function showFinishTip() {
       const wordDiv = document.getElementById('word');
       wordDiv.innerHTML = '<span class="finish-tip">🎉 已完成本轮词汇播放！</span>';
       if (show_phonetic) document.getElementById('phonetic').textContent = '';
       if (show_cn) document.getElementById('cn').textContent = '';
     }
-
     function getProgressText(idx) {
       let seen = new Set();
       for (let i = 0; i <= idx && i < seq.length; ++i) {
@@ -353,9 +473,7 @@ $font_size = $settings['font_size'] ?? 36;
       }
       return `已完成 ${seen.size} / ${words.length} 个`;
     }
-
     async function preloadAllAudio(cb) {
-      // 预加载所有音频
       let audios = [];
       let loaded = 0, total = 0;
       let audioUrls = new Set();
@@ -393,7 +511,11 @@ $font_size = $settings['font_size'] ?? 36;
       }
       setTimeout(done, 6000);
     }
-
+    function startRound() {
+      idx = 0;
+      buildSeq();
+      showCountdown(() => play(0));
+    }
     function play(idx) {
       if (_pause) {
         _pendingPlay = () => play(idx);
@@ -412,11 +534,17 @@ $font_size = $settings['font_size'] ?? 36;
         document.getElementById('controls').style.display = '';
         setControlsMode('done');
         document.getElementById('progress').innerHTML = `<span style="color:var(--primary);font-weight:bold;">已读 0 / ${words.length} 个</span>`;
-        showFinishTip();
-        window.scrollTo(0,0);
-        idx = 0;
-        // 重新buildSeq以便下一轮计数归零
-        buildSeq();
+        if (roundCount + 1 < rounds) {
+          roundCount++;
+          setTimeout(() => {
+            idx = 0;
+            buildSeq();
+            play(0);
+          }, 300);
+        } else {
+          showFinishTip();
+          window.scrollTo(0,0);
+        }
         return;
       }
       let w = words[seq[idx]];
@@ -424,11 +552,16 @@ $font_size = $settings['font_size'] ?? 36;
       setControlsMode('playing');
       document.getElementById('progress').textContent = getProgressText(idx);
       document.getElementById('word').textContent = w.word;
-      if (show_phonetic) document.getElementById('phonetic').textContent = w.uk_phonetic || w.us_phonetic || '';
-      if (show_cn) document.getElementById('cn').textContent = w.cn || '';
-
+      document.getElementById('word').classList.add('word');
+      if (show_phonetic) {
+        document.getElementById('phonetic').textContent = w.uk_phonetic || w.us_phonetic || '';
+        document.getElementById('phonetic').classList.add('phonetic');
+      }
+      if (show_cn) {
+        document.getElementById('cn').textContent = w.cn || '';
+        document.getElementById('cn').classList.add('cn');
+      }
       if (!window._audioErrorUrlSet) window._audioErrorUrlSet = new Set();
-
       function playAudio(url, cb) {
         if (!url || window._audioErrorUrlSet.has(url)) { cb && cb(); return; }
         let audio = new Audio(url);
@@ -445,8 +578,6 @@ $font_size = $settings['font_size'] ?? 36;
           cb && cb();
         }
       }
-
-      // 修复暂停后继续无法恢复播放
       function nextStep() {
         if (_pause) {
           _pendingPlay = () => nextStep();
@@ -456,12 +587,19 @@ $font_size = $settings['font_size'] ?? 36;
           document.getElementById('controls').style.display = '';
           setControlsMode('done');
           document.getElementById('progress').innerHTML = `<span style="color:var(--primary);font-weight:bold;">已读 0 / ${words.length} 个</span>`;
-          showFinishTip();
-          window.scrollTo(0,0);
+          if (roundCount + 1 < rounds) {
+            roundCount++;
+            setTimeout(() => {
+              idx = 0;
+              buildSeq();
+              play(0);
+            }, 300);
+          } else {
+            showFinishTip();
+            window.scrollTo(0,0);
+          }
         }
       }
-
-      // 播放英音后等待，再播美音
       playAudio(w.uk_audio, function() {
         setTimeout(function() {
           playAudio(w.us_audio, function() {
@@ -470,7 +608,6 @@ $font_size = $settings['font_size'] ?? 36;
         }, wait);
       });
     }
-
     function restart() {
       document.getElementById('controls').style.display = '';
       setControlsMode('playing');
@@ -480,16 +617,15 @@ $font_size = $settings['font_size'] ?? 36;
       document.getElementById('word').style.fontSize = fontSize + 'px';
       if (document.getElementById('phonetic')) document.getElementById('phonetic').style.fontSize = (fontSize/2) + 'px';
       if (document.getElementById('cn')) document.getElementById('cn').style.fontSize = (fontSize/2.2) + 'px';
-      buildSeq();
-      idx = 0; // 计数归零
+      roundCount = 0;
       window._audioErrorUrlSet = new Set();
       _pause = false;
       if (_timer) { clearTimeout(_timer); _timer = null; }
       if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
       document.getElementById('pause-btn').textContent = '暂停';
-      showCountdown(() => play(0));
+      buildSeq();
+      play(0);
     }
-
     function togglePause() {
       _pause = !_pause;
       let btn = document.getElementById('pause-btn');
@@ -505,7 +641,6 @@ $font_size = $settings['font_size'] ?? 36;
         }
       }
     }
-
     document.getElementById('font-size-range').addEventListener('input', function() {
       fontSize = parseInt(this.value);
       document.getElementById('font-size-val').textContent = fontSize;
@@ -513,18 +648,17 @@ $font_size = $settings['font_size'] ?? 36;
       if (document.getElementById('phonetic')) document.getElementById('phonetic').style.fontSize = (fontSize/2) + 'px';
       if (document.getElementById('cn')) document.getElementById('cn').style.fontSize = (fontSize/2.2) + 'px';
     });
-
     document.getElementById('fs-btn').onclick = function() {
       let el = document.documentElement;
       if (!document.fullscreenElement) el.requestFullscreen();
       else document.exitFullscreen();
     };
-
     // 初始化
     words = wordsRaw;
-    buildSeq();
+    roundCount = 0;
     preloadAllAudio(() => {
-      showCountdown(() => play(0));
+      buildSeq();
+      play(0);
     });
   </script>
 </body>

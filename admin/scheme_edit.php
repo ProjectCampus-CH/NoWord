@@ -373,20 +373,75 @@ if (isset($_SESSION['user_id'])) {
     .actions-row input[type="file"] {
       background: #fff;
       color: var(--primary-dark);
-      border: 1px solid var(--primary-light);
+      border: 1.5px solid var(--primary-light);
       border-radius: 7px;
-      padding: 0.3em 1em;
-      font-size: 0.98em;
+      padding: 0.38em 1em;
+      font-size: 1em;
       font-weight: 500;
       cursor: pointer;
-      transition: background .2s, color .2s, border .2s;
+      transition: background .2s, color .2s, border .2s, box-shadow .2s;
       margin: 0 0.5em 0 0.5em;
       outline: none;
+      box-shadow: 0 1px 4px rgba(255,152,0,0.07);
+      min-width: 180px;
+      max-width: 320px;
     }
-    .actions-row input[type="file"]:hover {
+    .actions-row input[type="file"]:hover, .actions-row input[type="file"]:focus {
       background: #fff3e0;
       color: var(--primary);
       border-color: var(--primary);
+      box-shadow: 0 2px 8px var(--primary-light);
+    }
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5em;
+      background: var(--primary-dark);
+      color: var(--on-primary);
+      border-radius: 10px;
+      padding: 0.5em 1.5em;
+      font-size: 1em;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
+      transition: background .2s, box-shadow .2s, transform .2s;
+      border: none;
+      margin: 0 0.5em 0 0.5em;
+      user-select: none;
+    }
+    .file-label:hover {
+      background: var(--primary-light);
+      color: var(--on-surface);
+      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
+      transform: scale(1.04);
+    }
+    .file-label input[type="file"] {
+      display: none;
+    }
+    .file-filename {
+      font-size: 0.98em;
+      color: var(--primary-dark);
+      margin-left: 0.5em;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    @media (prefers-color-scheme: dark) {
+      .file-label {
+        background: #37474f;
+        color: #ffb300;
+      }
+      .file-label:hover {
+        background: #ffb300;
+        color: #232323;
+      }
+      .file-filename {
+        color: #ffb300;
+      }
     }
     .msg {
       margin-bottom: 1em;
@@ -424,7 +479,10 @@ if (isset($_SESSION['user_id'])) {
         cell.innerHTML = '<input type="text" name="'+fields[i]+'[]" />';
       }
       let cell = row.insertCell(-1);
-      cell.innerHTML = '<button type="button" class="btn" onclick="delRow(this)">删除</button> <button type="button" class="btn" onclick="fetchWordInfo(this)">一键获取</button>';
+      cell.className = 'word-actions';
+      cell.innerHTML = '' +
+        '<button type="button" class="btn" onclick="delRow(this)">删除</button> ' +
+        '<button type="button" class="btn" onclick="fetchWordInfo(this)">一键获取</button>';
     }
     function delRow(btn) {
       const row = btn.parentNode.parentNode;
@@ -557,7 +615,7 @@ if (isset($_SESSION['user_id'])) {
         if (btn) {
           await fetchWordInfo(btn, method);
           count++;
-          if (count % 1 === 0) await new Promise(r => setTimeout(r, 2100));
+          if (count % 1 === 0) await new Promise(r => setTimeout(r, 100));
         }
       }
       alert('批量填充完成');
@@ -615,6 +673,7 @@ if (isset($_SESSION['user_id'])) {
             cell.innerHTML = '<input type="text" name="'+fields[i]+'[]" value="'+(w[fields[i]]||'')+'" />';
           }
           let cell = row.insertCell(-1);
+          cell.className = 'word-actions';
           cell.innerHTML = '<button type="button" class="btn" onclick="delRow(this)">删除</button> <button type="button" class="btn" onclick="fetchWordInfo(this)">一键获取</button>';
         }
         alert('导入成功');
@@ -655,6 +714,16 @@ if (isset($_SESSION['user_id'])) {
       document.body.appendChild(a);
       a.click();
       setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+    }
+
+    // 显示选中文件名
+    function showFileName(input) {
+      const span = document.getElementById('file-filename');
+      if (input.files && input.files.length > 0) {
+        span.textContent = input.files[0].name;
+      } else {
+        span.textContent = '';
+      }
     }
   </script>
 </head>
@@ -736,7 +805,10 @@ if (isset($_SESSION['user_id'])) {
       </div>
       <div class="actions-row">
         <button type="button" class="add-row" onclick="addRow()">添加词汇</button>
-        <input type="file" id="import-file" name="import_file" accept=".json,.csv">
+        <label class="file-label"><span class="material-icons" style="font-size:1.1em;">upload_file</span>选择文件
+          <input type="file" id="import-file" name="import_file" accept=".json,.csv" onchange="showFileName(this)">
+        </label>
+        <span class="file-filename" id="file-filename"></span>
         <button type="button" onclick="importWords()">导入</button>
         <button type="button" onclick="exportWords()">导出</button>
         <button type="submit" name="save">保存</button>

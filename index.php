@@ -203,28 +203,25 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       width: 60vw;
       min-width: 320px;
       max-width: 1200px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
+      column-count: 3;
+      column-gap: 20px;
       margin: 0 auto;
-      justify-content: flex-start;
-      align-items: stretch;
     }
     .card {
       background: var(--card);
       border-radius: 20px;
       box-shadow: var(--card-shadow);
       padding: 2rem 1.5rem;
-      min-width: 260px;
-      max-width: 1fr;
-      flex: 1 1 calc((100% - 40px)/3);
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 1rem;
+      min-width: 220px;
+      display: block;
+      margin-bottom: 20px;
       border: 1.5px solid #c8e6c9;
       transition: box-shadow .2s, transform .2s, border .2s;
       position: relative;
       overflow: hidden;
+      height: auto;
+      min-height: 120px;
+      break-inside: avoid;
     }
     .card:hover {
       box-shadow: 0 8px 32px rgba(255,152,0,0.18);
@@ -280,12 +277,12 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       .waterfall { width: 95vw; }
     }
     @media (max-width: 900px) {
-      .waterfall { width: 99vw; }
-      .card { min-width: 220px; }
+      .waterfall { width: 99vw; column-count: 2; }
+      .card { min-width: 180px; }
     }
     @media (max-width: 700px) {
       .main-content { margin-top: calc(var(--nav-height) + 22vh + 12px);}
-      .waterfall { flex-direction: column; gap: 1.2rem; width: 99vw; }
+      .waterfall { column-count: 1; gap: 1.2rem; width: 99vw; }
       .card { min-width: 0; }
       .top-app-bar { flex-direction: column; gap: 0.7em; }
       .bing-header-mask { font-size: 1em; padding: 0.7em 1em; }
@@ -386,8 +383,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
             $data = json_decode($s['data'] ?? '', true);
             if (isset($data['words']) && is_array($data['words'])) {
               $words = array_column($data['words'], 'word');
-              echo htmlspecialchars(implode('、', array_slice($words, 0, 12)));
-              if (count($words) > 12) echo ' ...';
+              echo htmlspecialchars(implode('、', $words));
             } else {
               echo '无词汇';
             }
