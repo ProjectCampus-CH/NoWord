@@ -101,294 +101,95 @@ $users = $pdo->query("SELECT id,username,role FROM users ORDER BY id ASC")->fetc
   <title>用户管理 - NoWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #ff9800;
-      --primary-dark: #c66900;
-      --primary-light: #ffd149;
-      --on-primary: #fff;
-      --surface: #fff;
-      --on-surface: #222;
-      --background: #f5f5f5;
-      --card: #fff;
-      --card-shadow: 0 2px 8px rgba(255,152,0,0.08);
-      --border-radius: 16px;
-      --nav-height: 64px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --primary: #ffb300;
-        --primary-dark: #c68400;
-        --primary-light: #ffe082;
-        --on-primary: #222;
-        --surface: #232323;
-        --on-surface: #eee;
-        --background: #181818;
-        --card: #232323;
-        --card-shadow: 0 2px 8px rgba(255,152,0,0.16);
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              dark: '#1e40af',
+              light: '#60a5fa',
+              pale: '#dbeafe',
+            }
+          }
+        }
       }
     }
-    body {
-      background: var(--background);
-      color: var(--on-surface);
-      min-height: 100vh;
-      font-family: system-ui, sans-serif;
-      margin: 0;
-    }
-    .top-app-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--nav-height);
-      background: var(--primary);
-      color: var(--on-primary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      padding: 0 2vw;
-      font-family: 'Roboto', system-ui, sans-serif;
-    }
-    .top-app-bar .left {
-      font-size: 1.35em;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      user-select: none;
-    }
-    .top-app-bar .left .material-icons {
-      font-size: 1.3em;
-      vertical-align: middle;
-    }
-    .top-app-bar .center {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-width: 0;
-    }
-    .top-app-bar .right {
-      display: flex;
-      align-items: center;
-      gap: 1.2em;
-      font-size: 1em;
-      min-width: 120px;
-      justify-content: flex-end;
-    }
-    .top-app-bar .btn {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      padding: 0.5em 1.3em;
-      font-size: 1em;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s;
-      outline: none;
-      text-decoration: none;
-    }
-    .top-app-bar .btn:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-    }
-    .container {
-      max-width: 700px;
-      margin: calc(var(--nav-height) + 2rem) auto 2rem auto;
-      background: var(--card);
-      border-radius: 18px;
-      box-shadow: 0 4px 24px rgba(255,152,0,0.10);
-      padding: 2.5rem 2rem 2rem 2rem;
-      border: 1.5px solid var(--primary-light);
-    }
-    h2 {
-      color: var(--primary-dark);
-      letter-spacing: 0.05em;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.2em;
-    }
-    a {
-      color: var(--primary-dark);
-      text-decoration: underline;
-      font-weight: 500;
-      font-size: 1.05em;
-      transition: color .2s;
-    }
-    a:hover {
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .add-form {
-      display: flex;
-      gap: 0.7em;
-      margin-bottom: 2rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .add-form input, .add-form select {
-      padding: 0.5em 0.8em;
-      border: 1px solid var(--primary-light);
-      border-radius: 8px;
-      background: #fff;
-      font-size: 1em;
-      transition: border 0.2s;
-    }
-    .add-form input:focus, .add-form select:focus {
-      border: 1.5px solid var(--primary-dark);
-      outline: none;
-      background: #fff8e1;
-    }
-    .add-form button {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 10px;
-      padding: 0.5em 1.5em;
-      font-size: 1em;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-    }
-    .add-form button:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 2rem;
-      background: var(--card);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(255,152,0,0.06);
-    }
-    th, td {
-      padding: 0.7em 0.5em;
-      border-bottom: 1px solid #ffe0b2;
-      text-align: center;
-    }
-    th {
-      color: var(--primary-dark);
-      background: #fff3e0;
-      font-weight: 600;
-      font-size: 1.05em;
-    }
-    .actions button, .actions select {
-      margin-right: 0.5em;
-      padding: 0.3em 0.8em;
-      border-radius: 6px;
-      border: 1px solid var(--primary-light);
-      background: #fff;
-      color: var(--primary-dark);
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .2s, color .2s;
-    }
-    .actions button:hover, .actions select:focus {
-      background: #fff3e0;
-      color: var(--primary);
-      border-color: var(--primary);
-    }
-    .msg {
-      margin-bottom: 1em;
-      padding: 0.7em 1em;
-      border-radius: 8px;
-      font-size: 1em;
-      text-align: center;
-      background: #fff3e0;
-      color: var(--primary-dark);
-      border: 1px solid var(--primary-light);
-    }
-    @media (max-width: 900px) {
-      .container { width: 99vw; padding: 1.2rem 0.2rem; }
-      table { min-width: 700px; }
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
-      .container { background: #232d23; border: 1.5px solid #37474f; }
-      table { background: #232d23; color: #eee; }
-      th { background: #263238; color: #ffb300; }
-      .msg { background: #263238; color: #ffb300; border: 1px solid #c68400; }
-      .add-form input, .add-form select { background: #232d23; color: #eee; border: 1px solid #37474f; }
-      .add-form input:focus, .add-form select:focus { background: #263238; border: 1.5px solid #ffb300; }
-      .actions button, .actions select { background: #37474f; color: #ffb300; border: none; }
-      .actions button:hover, .actions select:focus { background: #ffb300; color: #232323; }
-    }
-  </style>
+  </script>
 </head>
-<body>
-  <div class="top-app-bar">
-    <div class="left">
-      <span class="material-icons">manage_accounts</span>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+  <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
+    <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
+      <span class="material-icons text-2xl">manage_accounts</span>
       用户管理
     </div>
-    <div class="center">
-      <a href="index.php" class="btn"><span class="material-icons">arrow_back</span>返回后台</a>
+    <div class="flex-1 flex justify-center items-center min-w-0">
+      <a href="index.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">arrow_back</span>返回后台</a>
     </div>
-    <div class="right">
+    <div class="flex items-center gap-6 min-w-[120px] justify-end">
       <?php if (isset($user['id'])): ?>
-        <span style="display:flex;align-items:center;gap:0.2em;"><span class="material-icons" style="font-size:1.1em;">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
+        <span class="flex items-center gap-2 text-base"><span class="material-icons text-lg">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
       <?php else: ?>
-        <a href="/login.php" class="btn"><span class="material-icons">login</span>登录</a>
+        <a href="/login.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">login</span>登录</a>
       <?php endif; ?>
     </div>
   </div>
-  <div class="container">
-    <h2>用户管理</h2>
-    <?php if ($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
-    <form class="add-form" method="post">
+  <div class="max-w-2xl mx-auto mt-24 mb-8 bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-10 border border-primary-light backdrop-blur-md">
+    <h2 class="text-2xl font-bold text-primary-dark dark:text-primary-light text-center mb-8">用户管理</h2>
+    <?php if ($msg): ?><div class="mb-4 p-3 rounded-lg text-base text-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-primary-light dark:border-primary-dark"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+    <form class="flex gap-3 mb-8 items-center flex-wrap" method="post">
       <input type="hidden" name="action" value="add">
-      <input type="text" name="username" placeholder="新用户名" required>
-      <input type="password" name="password" placeholder="初始密码" required>
-      <select name="role">
+      <input type="text" name="username" placeholder="新用户名" required class="px-3 py-2 border border-primary-light rounded-lg bg-primary-pale focus:border-primary-dark focus:bg-white focus:outline-none">
+      <input type="password" name="password" placeholder="初始密码" required class="px-3 py-2 border border-primary-light rounded-lg bg-primary-pale focus:border-primary-dark focus:bg-white focus:outline-none">
+      <select name="role" class="px-3 py-2 border border-primary-light rounded-lg bg-primary-pale focus:border-primary-dark focus:bg-white focus:outline-none">
         <option value="user">普通用户</option>
         <option value="admin">管理员</option>
       </select>
-      <button type="submit">添加用户</button>
+      <button type="submit" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150">添加用户</button>
     </form>
-    <table>
-      <tr>
-        <th>ID</th><th>用户名</th><th>角色</th><th>操作</th>
-      </tr>
-      <?php foreach ($users as $u): ?>
-      <tr>
-        <td><?= $u['id'] ?></td>
-        <td><?= htmlspecialchars($u['username']) ?></td>
-        <td><?= $u['role'] ?></td>
-        <td class="actions">
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="resetpw">
-            <input type="hidden" name="id" value="<?= $u['id'] ?>">
-            <button type="submit">重置密码</button>
-          </form>
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="del">
-            <input type="hidden" name="id" value="<?= $u['id'] ?>">
-            <button type="submit" onclick="return confirm('确定删除？')">删除</button>
-          </form>
-          <form method="post" style="display:inline;">
-            <input type="hidden" name="action" value="role">
-            <input type="hidden" name="id" value="<?= $u['id'] ?>">
-            <select name="role" onchange="this.form.submit()">
-              <option value="user" <?= $u['role']==='user'?'selected':'' ?>>普通用户</option>
-              <option value="admin" <?= $u['role']==='admin'?'selected':'' ?>>管理员</option>
-            </select>
-          </form>
-        </td>
-      </tr>
-      <?php endforeach; ?>
-    </table>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse rounded-xl shadow bg-white dark:bg-blue-950">
+        <thead>
+          <tr>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">ID</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">用户名</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">角色</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($users as $u): ?>
+          <tr class="hover:bg-primary-pale/70">
+            <td class="py-2 px-3"><?= $u['id'] ?></td>
+            <td class="py-2 px-3"><?= htmlspecialchars($u['username']) ?></td>
+            <td class="py-2 px-3"><?= $u['role'] ?></td>
+            <td class="py-2 px-3 flex flex-wrap gap-2 justify-center items-center">
+              <form method="post" class="inline">
+                <input type="hidden" name="action" value="resetpw">
+                <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                <button type="submit" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150">重置密码</button>
+              </form>
+              <form method="post" class="inline">
+                <input type="hidden" name="action" value="del">
+                <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                <button type="submit" onclick="return confirm('确定删除？')" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150">删除</button>
+              </form>
+              <form method="post" class="inline">
+                <input type="hidden" name="action" value="role">
+                <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                <select name="role" onchange="this.form.submit()" class="px-2 py-1 border border-primary-light rounded-lg bg-primary-pale focus:border-primary-dark focus:bg-white focus:outline-none text-sm">
+                  <option value="user" <?= $u['role']==='user'?'selected':'' ?>>普通用户</option>
+                  <option value="admin" <?= $u['role']==='admin'?'selected':'' ?>>管理员</option>
+                </select>
+              </form>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </body>
 </html>

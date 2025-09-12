@@ -58,159 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>登录 - NoWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <style>
-    body {
-      min-height: 100vh;
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: #222;
-      color: #222;
-      display: flex;
-      align-items: stretch;
-      justify-content: flex-end;
-      position: relative;
-      overflow: hidden;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              dark: '#1e40af',
+              light: '#60a5fa',
+              pale: '#dbeafe',
+            }
+          }
+        }
+      }
     }
-    .bing-bg {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      z-index: 0;
-      object-fit: cover;
-      filter: brightness(0.85) blur(0.5px);
-      transition: filter .3s;
-    }
-    .login-layout {
-      position: relative;
-      z-index: 1;
-      width: 100vw;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-end;
-    }
-    .announcement {
-      width: 40vw;
-      max-width: 480px;
-      min-width: 260px;
-      max-height: 60vh;
-      background: rgba(255,255,255,0.85);
-      border-radius: 18px;
-      margin-left: 6vw;
-      margin-right: 2vw;
-      padding: 2em 2em 1.5em 2em;
-      overflow-y: auto;
-      box-shadow: 0 4px 24px rgba(56,142,60,0.13);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      font-size: 1.08em;
-      color: #333;
-    }
-    .announcement h3 {
-      margin-top: 0;
-      color: #ff9800;
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 0.7em;
-    }
-    .login-card {
-      width: 340px;
-      min-width: 260px;
-      max-width: 400px;
-      margin: 0 6vw 0 0;
-      padding: 2.5rem 2rem 2rem 2rem;
-      border-radius: 20px;
-      box-shadow: 0 4px 24px rgba(56,142,60,0.13);
-      background: rgba(255,255,255,0.97);
-      display: flex;
-      flex-direction: column;
-      gap: 1.1em;
-      border: 1px solid #e0f2f1;
-      align-self: center;
-    }
-    h2 {
-      margin-bottom: 0.5em;
-      color: #ff9800;
-      letter-spacing: 0.05em;
-      font-weight: 700;
-      text-align: center;
-    }
-    label {
-      font-weight: 500;
-      margin-bottom: 0.2em;
-      color: #c66900;
-      display: block;
-    }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 0.6em 0.8em;
-      margin-bottom: 0.7em;
-      border: 1px solid #c8e6c9;
-      border-radius: 8px;
-      background: #f9fff9;
-      font-size: 1em;
-      transition: border 0.2s;
-    }
-    input:focus {
-      border: 1.5px solid #ff9800;
-      outline: none;
-      background: #fff;
-    }
-    .keep-login {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      margin-bottom: 0.5em;
-      font-size: 0.98em;
-      color: #888;
-    }
-    button[type="submit"] {
-      margin-top: 1rem;
-      background: linear-gradient(90deg, #ff9800 60%, #ffd149 100%);
-      color: #fff;
-      border: none;
-      padding: 0.8em 2em;
-      border-radius: 10px;
-      font-size: 1.1em;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      justify-content: center;
-    }
-    button[type="submit"]:hover {
-      background: linear-gradient(90deg, #c66900 60%, #ff9800 100%);
-    }
-    .msg {
-      margin-top: 1em;
-      padding: 0.7em 1em;
-      border-radius: 8px;
-      font-size: 1em;
-      text-align: center;
-      background: #ffebee;
-      color: #c62828;
-      border: 1px solid #ffcdd2;
-    }
-    @media (max-width: 900px) {
-      .announcement { display: none; }
-      .login-card { margin: 0 auto; }
-      .login-layout { justify-content: center; }
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: #181818; color: #eee; }
-      .announcement { background: rgba(35,35,35,0.92); color: #eee; }
-      .login-card { background: rgba(35,35,35,0.97); border: 1px solid #37474f; }
-      input { background: #232d23; color: #eee; border: 1px solid #37474f; }
-      input:focus { background: #263238; border: 1.5px solid #ffb300; }
-      .msg { background: #2d2323; color: #ff8a80; border: 1px solid #c62828; }
-    }
-  </style>
+  </script>
   <script>
     // 加载Bing每日一图
     window.addEventListener('DOMContentLoaded', function() {
@@ -227,25 +91,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
   </script>
 </head>
-<body>
-  <img id="bing-bg" class="bing-bg" src="" alt="Bing每日一图">
-  <div class="login-layout">
-    <div class="announcement" id="announcement-box"></div>
-    <form class="login-card" method="post" autocomplete="off">
-      <h2>NoWord 登录</h2>
-      <label>用户名</label>
-      <input type="text" name="username" required>
-      <label>密码</label>
-      <input type="password" name="password" required>
-      <div class="keep-login">
-        <input type="checkbox" name="keep_login" id="keep_login" style="width:auto;">
-        <label for="keep_login" style="margin:0;display:inline;font-weight:400;">保持登录</label>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans flex items-stretch justify-end relative overflow-hidden">
+  <img id="bing-bg" class="fixed top-0 left-0 w-screen h-screen z-0 object-cover brightness-90 blur-[1px] transition" src="" alt="Bing每日一图">
+  <div class="relative z-10 w-screen min-h-screen flex flex-row items-center justify-end">
+    <div class="w-[40vw] max-w-[480px] min-w-[260px] max-h-[60vh] bg-white/90 dark:bg-blue-950/80 rounded-3xl ml-[6vw] mr-[2vw] p-8 overflow-y-auto shadow-xl flex flex-col justify-center items-start text-[1.08em] text-gray-800 dark:text-blue-100 hidden md:hidden lg:flex">
+      <div class="w-full" id="announcement-box"></div>
+    </div>
+    <form class="w-[340px] min-w-[260px] max-w-[400px] m-0 ml-0 mr-[6vw] p-10 pt-10 pb-8 rounded-3xl shadow-xl bg-white/95 dark:bg-blue-950/90 flex flex-col gap-4 border border-primary-light self-center backdrop-blur-md" method="post" autocomplete="off">
+      <h2 class="mb-2 text-primary-dark tracking-wide font-bold text-center text-2xl">NoWord 登录</h2>
+      <label class="font-medium mb-1 text-primary-dark dark:text-primary-light">用户名</label>
+      <input type="text" name="username" required class="w-full px-3 py-2 mb-2 border border-primary-light dark:border-primary-dark rounded-lg bg-primary-pale dark:bg-blue-900 text-base focus:border-primary-dark focus:bg-white dark:focus:bg-blue-950 focus:outline-none">
+      <label class="font-medium mb-1 text-primary-dark dark:text-primary-light">密码</label>
+      <input type="password" name="password" required class="w-full px-3 py-2 mb-2 border border-primary-light dark:border-primary-dark rounded-lg bg-primary-pale dark:bg-blue-900 text-base focus:border-primary-dark focus:bg-white dark:focus:bg-blue-950 focus:outline-none">
+      <div class="flex items-center gap-2 mb-2 text-sm text-gray-500 dark:text-blue-200">
+        <input type="checkbox" name="keep_login" id="keep_login" class="w-auto">
+        <label for="keep_login" class="m-0 inline font-normal">保持登录</label>
       </div>
-      <button type="submit"><span class="material-icons">login</span>登录</button>
+      <button type="submit" class="mt-4 bg-gradient-to-r from-primary-dark to-primary-light text-white rounded-xl px-6 py-2 flex items-center gap-1 font-semibold shadow hover:from-primary hover:to-primary-light hover:text-primary-dark transition-all duration-150 justify-center">
+        <span class="material-icons">login</span>登录
+      </button>
       <?php if ($msg): ?>
-        <div class="msg"><?= htmlspecialchars($msg) ?></div>
+        <div class="mt-4 p-3 rounded-lg text-base text-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-primary-light dark:border-primary-dark"><?= htmlspecialchars($msg) ?></div>
       <?php endif; ?>
     </form>
   </div>
+  <style>
+    @media (max-width: 900px) {
+      .announcement { display: none !important; }
+      .login-card { margin: 0 auto !important; }
+      .login-layout { justify-content: center !important; }
+    }
+  </style>
 </body>
 </html>

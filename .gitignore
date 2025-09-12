@@ -1,2 +1,4 @@
 *.db
 config.json
+config.php
+data/

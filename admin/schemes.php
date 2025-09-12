@@ -99,233 +99,83 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
   <title>方案管理 - NoWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #ff9800;
-      --primary-dark: #c66900;
-      --primary-light: #ffd149;
-      --on-primary: #fff;
-      --surface: #fff;
-      --on-surface: #222;
-      --background: #f5f5f5;
-      --card: #fff;
-      --card-shadow: 0 2px 8px rgba(255,152,0,0.08);
-      --border-radius: 16px;
-      --nav-height: 64px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --primary: #ffb300;
-        --primary-dark: #c68400;
-        --primary-light: #ffe082;
-        --on-primary: #222;
-        --surface: #232323;
-        --on-surface: #eee;
-        --background: #181818;
-        --card: #232323;
-        --card-shadow: 0 2px 8px rgba(255,152,0,0.16);
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              dark: '#1e40af',
+              light: '#60a5fa',
+              pale: '#dbeafe',
+            }
+          }
+        }
       }
     }
-    body {
-      background: var(--background);
-      color: var(--on-surface);
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      min-height: 100vh;
-    }
-    .top-app-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--nav-height);
-      background: var(--primary);
-      color: var(--on-primary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      padding: 0 2vw;
-      font-family: 'Roboto', system-ui, sans-serif;
-    }
-    .top-app-bar .left {
-      font-size: 1.35em;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      user-select: none;
-    }
-    .top-app-bar .left .material-icons {
-      font-size: 1.3em;
-      vertical-align: middle;
-    }
-    .top-app-bar .center {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-width: 0;
-    }
-    .top-app-bar .right {
-      display: flex;
-      align-items: center;
-      gap: 1.2em;
-      font-size: 1em;
-      min-width: 120px;
-      justify-content: flex-end;
-    }
-    .top-app-bar .btn {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      padding: 0.5em 1.3em;
-      font-size: 1em;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s;
-      outline: none;
-      text-decoration: none;
-    }
-    .top-app-bar .btn:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-    }
-    .container {
-      width: 80vw;
-      max-width: 1200px;
-      min-width: 320px;
-      margin: calc(var(--nav-height) + 2rem) auto 2rem auto;
-      background: var(--card);
-      border-radius: 18px;
-      box-shadow: var(--card-shadow);
-      padding: 2.5rem 2rem 2rem 2rem;
-      border: 1.5px solid #c8e6c9;
-    }
-    h2 {
-      color: var(--primary-dark);
-      letter-spacing: 0.05em;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.2em;
-    }
-    a {
-      color: var(--primary-dark);
-      text-decoration: underline;
-      font-weight: 500;
-      font-size: 1.05em;
-      transition: color .2s;
-    }
-    a:hover {
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .add-form {
-      display: flex;
-      gap: 0.7em;
-      margin-bottom: 2rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .add-form input {
-      padding: 0.5em 0.8em;
-      border: 1px solid #c8e6c9;
-      border-radius: 8px;
-      background: #f9fff9;
-      font-size: 1em;
-      transition: border 0.2s;
-    }
-    .add-form input:focus {
-      border: 1.5px solid var(--primary-dark);
-      outline: none;
-      background: #fff;
-    }
-    .add-form button {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 10px;
-      padding: 0.5em 1.5em;
-      font-size: 1em;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-    }
-    .add-form button:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    table.schemes-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5em;
-      background: var(--card);
-    }
-    table.schemes-table th, table.schemes-table td {
-      border: 1px solid #e0f2f1;
-      padding: 0.7em 0.8em;
-      text-align: left;
-      font-size: 1.05em;
-    }
-    table.schemes-table th {
-      background: #f5fff5;
-      color: var(--primary-dark);
-      font-weight: 700;
-    }
-    table.schemes-table tr:hover td {
-      background: #f9fff9;
-    }
-    .scheme-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5em;
-      align-items: center;
-    }
-    .scheme-actions button {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      padding: 0.3em 1.1em;
-      font-size: 1em;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-      display: flex;
-      align-items: center;
-      gap: 0.3em;
-    }
-    .scheme-actions button:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    @media (max-width: 900px) {
-      .container { width: 99vw; padding: 1.2rem 0.2rem; }
-      table.schemes-table th, table.schemes-table td { font-size: 0.98em; }
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
-      .top-app-bar { background: #263238; }
-      .container { background: #232d23; border: 1.5px solid #37474f; }
-      table.schemes-table { background: #232d23; }
-      table.schemes-table th { background: #263238; color: #ffb300; }
-      table.schemes-table td { color: #eee; }
-      .scheme-actions button { background: #37474f; color: #ffb300; }
-      .scheme-actions button:hover { background: #ffb300; color: #232323; }
-    }
-  </style>
+  </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+  <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
+    <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
+      <span class="material-icons text-2xl">library_books</span>
+      方案管理 - NoWord
+    </div>
+    <div class="flex-1 flex justify-center items-center min-w-0">
+      <a href="/admin/index.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">admin_panel_settings</span>后台首页</a>
+      <span class="inline-block w-5"></span>
+      <a href="/" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">home</span>回到首页</a>
+    </div>
+    <div class="flex items-center gap-6 min-w-[120px] justify-end">
+      <span class="flex items-center gap-2 text-base"><span class="material-icons text-lg">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
+      <a href="/logout.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">logout</span>退出登录</a>
+    </div>
+  </div>
+  <div class="w-[80vw] max-w-[1200px] min-w-[320px] mx-auto mt-24 mb-8 bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-10 border border-primary-light backdrop-blur-md">
+    <h2 class="text-2xl font-bold text-primary-dark dark:text-primary-light text-center mb-8">方案管理</h2>
+    <a href="index.php" class="inline-block mb-4 text-primary-dark hover:text-primary-light underline">← 返回后台</a>
+    <?php if ($msg): ?><div class="mb-4 p-3 rounded-lg text-base text-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-primary-light dark:border-primary-dark"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+    <form class="flex gap-3 mb-8 items-center flex-wrap" method="post">
+      <input type="hidden" name="action" value="add">
+      <input type="text" name="name" placeholder="新方案名称" required class="px-3 py-2 border border-primary-light rounded-lg bg-primary-pale focus:border-primary-dark focus:bg-white focus:outline-none">
+      <button type="submit" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150">新增方案</button>
+    </form>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse rounded-xl shadow bg-white dark:bg-blue-950">
+        <thead>
+          <tr>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[40%]">方案名称</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[20%]">创建时间</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[40%]">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($schemes as $s): ?>
+          <tr class="hover:bg-primary-pale/70">
+            <td class="py-2 px-3"><?= htmlspecialchars($s['name']) ?></td>
+            <td class="py-2 px-3"><?= htmlspecialchars($s['created_at']) ?></td>
+            <td class="py-2 px-3 flex flex-wrap gap-2 items-center">
+              <form method="post" class="inline">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="id" value="<?= $s['id'] ?>">
+                <button type="submit" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150 flex items-center gap-1"><span class="material-icons text-base">edit</span>编辑</button>
+              </form>
+              <button type="button" onclick="renameScheme(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>')" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150 flex items-center gap-1"><span class="material-icons text-base">drive_file_rename_outline</span>重命名</button>
+              <button type="button" onclick="copyScheme(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>')" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150 flex items-center gap-1"><span class="material-icons text-base">content_copy</span>复制</button>
+              <form method="post" class="inline">
+                <input type="hidden" name="action" value="del">
+                <input type="hidden" name="id" value="<?= $s['id'] ?>">
+                <button type="submit" onclick="return confirm('确定删除？')" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150 flex items-center gap-1"><span class="material-icons text-base">delete</span>删除</button>
+              </form>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
   <script>
     function renameScheme(id, oldName) {
       const newName = prompt('请输入新方案名：', oldName);
@@ -350,63 +200,5 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       }
     }
   </script>
-</head>
-<body>
-  <div class="top-app-bar">
-    <div class="left">
-      <span class="material-icons">library_books</span>
-      方案管理 - NoWord
-    </div>
-    <div class="center">
-      <a href="/admin/index.php" class="btn"><span class="material-icons">admin_panel_settings</span>后台首页</a>
-      <span style="display:inline-block;width:1.2em;"></span>
-      <a href="/" class="btn"><span class="material-icons">home</span>回到首页</a>
-    </div>
-    <div class="right">
-      <span style="display:flex;align-items:center;gap:0.2em;"><span class="material-icons" style="font-size:1.1em;">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
-      <a href="/logout.php" class="btn"><span class="material-icons">logout</span>退出登录</a>
-    </div>
-  </div>
-  <div class="container">
-    <h2>方案管理</h2>
-    <a href="index.php">← 返回后台</a>
-    <?php if ($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
-    <form class="add-form" method="post">
-      <input type="hidden" name="action" value="add">
-      <input type="text" name="name" placeholder="新方案名称" required>
-      <button type="submit">新增方案</button>
-    </form>
-    <table class="schemes-table">
-      <thead>
-        <tr>
-          <th style="width:40%;">方案名称</th>
-          <th style="width:20%;">创建时间</th>
-          <th style="width:40%;">操作</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($schemes as $s): ?>
-        <tr>
-          <td><?= htmlspecialchars($s['name']) ?></td>
-          <td><?= htmlspecialchars($s['created_at']) ?></td>
-          <td class="scheme-actions">
-            <form method="post" style="display:inline;">
-              <input type="hidden" name="action" value="edit">
-              <input type="hidden" name="id" value="<?= $s['id'] ?>">
-              <button type="submit"><span class="material-icons" style="font-size:1em;vertical-align:middle;">edit</span>编辑</button>
-            </form>
-            <button type="button" onclick="renameScheme(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>')"><span class="material-icons" style="font-size:1em;vertical-align:middle;">drive_file_rename_outline</span>重命名</button>
-            <button type="button" onclick="copyScheme(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>')"><span class="material-icons" style="font-size:1em;vertical-align:middle;">content_copy</span>复制</button>
-            <form method="post" style="display:inline;">
-              <input type="hidden" name="action" value="del">
-              <input type="hidden" name="id" value="<?= $s['id'] ?>">
-              <button type="submit" onclick="return confirm('确定删除？')"><span class="material-icons" style="font-size:1em;vertical-align:middle;">delete</span>删除</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
 </body>
 </html>

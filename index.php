@@ -47,258 +47,77 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
   <title>NoWord 主页</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #ff9800;
-      --primary-dark: #c66900;
-      --primary-light: #ffd149;
-      --on-primary: #fff;
-      --surface: #fff;
-      --on-surface: #222;
-      --background: #f5f5f5;
-      --card: #fff;
-      --card-shadow: 0 2px 8px rgba(255,152,0,0.08);
-      --border-radius: 16px;
-      --nav-height: 64px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --primary: #ffb300;
-        --primary-dark: #c68400;
-        --primary-light: #ffe082;
-        --on-primary: #222;
-        --surface: #232323;
-        --on-surface: #eee;
-        --background: #181818;
-        --card: #232323;
-        --card-shadow: 0 2px 8px rgba(255,152,0,0.16);
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              dark: '#1e40af',
+              light: '#60a5fa',
+              pale: '#dbeafe',
+            }
+          }
+        }
       }
     }
-    body {
-      background: var(--background);
-      color: var(--on-surface);
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      min-height: 100vh;
-    }
-    .top-app-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--nav-height);
-      background: var(--primary);
-      color: var(--on-primary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      padding: 0 2vw;
-      font-family: 'Roboto', system-ui, sans-serif;
-    }
-    .top-app-bar .left {
-      font-size: 1.35em;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      user-select: none;
-    }
-    .top-app-bar .left .material-icons {
-      font-size: 1.3em;
-      vertical-align: middle;
-    }
-    .top-app-bar .center {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-width: 0;
-    }
-    .top-app-bar .right {
-      display: flex;
-      align-items: center;
-      gap: 1.2em;
-      font-size: 1em;
-      min-width: 120px;
-      justify-content: flex-end;
-    }
-    .top-app-bar .btn, .top-app-bar .search-btn {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      padding: 0.5em 1.3em;
-      font-size: 1em;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s;
-      outline: none;
-      text-decoration: none;
-    }
-    .top-app-bar .btn:hover, .top-app-bar .search-btn:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-    }
-    .top-app-bar .search-box {
-      border-radius: 8px;
-      border: none;
-      padding: 0.4em 1em;
-      font-size: 1em;
-      margin-right: 0.5em;
-      background: var(--surface);
-      color: var(--on-surface);
-      box-shadow: 0 1px 4px rgba(255,152,0,0.07);
-      outline: none;
-      min-width: 180px;
-      max-width: 320px;
-      transition: box-shadow .2s;
-    }
-    .top-app-bar .search-box:focus {
-      box-shadow: 0 2px 8px var(--primary-light);
-    }
-    .bing-header-img {
-      width: 100vw;
-      height: 40vh;
-      min-height: 260px;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-      margin: 0;
-      position: relative;
-      z-index: 1;
-    }
-    .bing-header-mask {
-      position: absolute;
-      left: 50%;
-      top: 20vh;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.45);
-      color: #fff;
-      border-radius: 18px;
-      padding: 1.2em 2em;
-      max-width: 70vw;
-      min-width: 220px;
-      font-size: 1.3em;
-      font-weight: 500;
-      text-align: center;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.13);
-      z-index: 2;
-      word-break: break-all;
-      line-height: 1.5;
-      pointer-events: none;
-      user-select: none;
-    }
-    .main-content {
-      margin-top: 12px;
-      display: flex;
-      justify-content: center;
-      width: 100vw;
-    }
-    .waterfall {
-      width: 60vw;
-      min-width: 320px;
-      max-width: 1200px;
-      column-count: 3;
-      column-gap: 20px;
-      margin: 0 auto;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      box-shadow: var(--card-shadow);
-      padding: 2rem 1.5rem;
-      min-width: 220px;
-      display: block;
-      margin-bottom: 20px;
-      border: 1.5px solid #c8e6c9;
-      transition: box-shadow .2s, transform .2s, border .2s;
-      position: relative;
-      overflow: hidden;
-      height: auto;
-      min-height: 120px;
-      break-inside: avoid;
-    }
-    .card:hover {
-      box-shadow: 0 8px 32px rgba(255,152,0,0.18);
-      transform: translateY(-4px) scale(1.025);
-      border-color: var(--primary);
-    }
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--primary-dark);
-      margin-bottom: 0.5em;
-      letter-spacing: 0.03em;
-      z-index: 1;
-      position: relative;
-    }
-    .card-desc {
-      flex: 1;
-      color: #444;
-      margin-bottom: 1.5rem;
-      font-size: 1.05em;
-      z-index: 1;
-      position: relative;
-      word-break: break-all;
-    }
-    .card-btn {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 10px;
-      padding: 0.6em 1.5em;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      text-align: center;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-      z-index: 1;
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      justify-content: center;
-    }
-    .card-btn:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    @media (max-width: 1100px) {
-      .waterfall { width: 95vw; }
-    }
-    @media (max-width: 900px) {
-      .waterfall { width: 99vw; column-count: 2; }
-      .card { min-width: 180px; }
-    }
-    @media (max-width: 700px) {
-      .main-content { margin-top: calc(var(--nav-height) + 22vh + 12px);}
-      .waterfall { column-count: 1; gap: 1.2rem; width: 99vw; }
-      .card { min-width: 0; }
-      .top-app-bar { flex-direction: column; gap: 0.7em; }
-      .bing-header-mask { font-size: 1em; padding: 0.7em 1em; }
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
-      .top-app-bar { background: #263238; }
-      .card { background: #232d23; border: 1.5px solid #37474f; }
-      .card-desc { color: #bbb; }
-      .card-title { color: #ffb300; }
-      .top-app-bar .left { color: #ffb300; }
-      .top-app_bar .btn, .top-app_bar .search-btn { background: #37474f; }
-      .top-app_bar .btn:hover, .top-app_bar .search-btn:hover { background: #455a64; }
-      .bing-header-mask { background: rgba(0,0,0,0.65);}
-    }
-  </style>
+  </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+  <!-- 顶部导航栏 -->
+  <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
+    <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
+      <span class="material-icons text-2xl">auto_stories</span>
+      NoWord - 没词
+    </div>
+    <div class="flex-1 flex justify-center items-center min-w-0">
+      <input class="rounded-xl border-none px-4 py-2 text-base bg-white text-gray-900 shadow focus:outline-none focus:ring-2 focus:ring-primary-light min-w-[180px] max-w-[320px] w-64 mr-2"
+        type="text" placeholder="搜索方案/单词">
+      <button class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-4 py-2 flex items-center gap-1 font-medium shadow transition-all duration-150">
+        <span class="material-icons">search</span>搜索
+      </button>
+    </div>
+    <div class="flex items-center gap-6 min-w-[120px] justify-end">
+      <?php if (isset($user['id'])): ?>
+        <span class="flex items-center gap-2"><span class="material-icons text-lg">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
+        <?php if (strpos($_SERVER['SCRIPT_NAME'], '/admin/') === false): ?>
+          <a href="/admin/" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-4 py-2 flex items-center gap-1 font-medium shadow transition-all duration-150"><span class="material-icons">admin_panel_settings</span>后台管理</a>
+        <?php endif; ?>
+      <?php else: ?>
+        <a href="/login.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-4 py-2 flex items-center gap-1 font-medium shadow transition-all duration-150"><span class="material-icons">login</span>登录</a>
+      <?php endif; ?>
+    </div>
+  </div>
+  <!-- Bing每日一图头图及一言 -->
+  <div class="relative w-screen h-[40vh] min-h-[260px] max-h-[480px] overflow-hidden z-10 mt-16">
+    <img id="bing-header-img" class="w-full h-full object-cover" src="" alt="Bing每日一图">
+    <div id="bing-header-mask" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary-dark/80 text-white rounded-xl px-8 py-6 max-w-[70vw] min-w-[220px] text-lg font-medium text-center shadow-lg pointer-events-none select-none whitespace-pre-line"></div>
+  </div>
+  <!-- 主体内容 -->
+  <div class="mt-4 flex justify-center w-screen">
+    <div class="w-[60vw] min-w-[320px] max-w-[1200px] grid grid-cols-3 gap-8 mx-auto
+      md:w-[95vw] md:grid-cols-2 sm:w-[99vw] sm:grid-cols-1">
+      <?php foreach ($schemes as $s): ?>
+      <div class="bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-8 min-w-[180px] mb-6 border border-primary-light hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-200 flex flex-col backdrop-blur-md">
+        <div class="text-lg font-bold text-primary-dark dark:text-primary-light mb-2"><?= htmlspecialchars($s['name']) ?></div>
+        <div class="flex-1 text-gray-700 dark:text-blue-100 mb-6 text-base break-words">
+          <?php
+            $data = json_decode($s['data'] ?? '', true);
+            if (isset($data['words']) && is_array($data['words'])) {
+              $words = array_column($data['words'], 'word');
+              echo htmlspecialchars(implode('、', $words));
+            } else {
+              echo '无词汇';
+            }
+          ?>
+        </div>
+        <a class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-6 py-2 flex items-center gap-1 font-semibold shadow transition-all duration-150 justify-center" href="/present/index.php?id=<?= $s['id'] ?>"><span class="material-icons">play_circle</span>开始</a>
+      </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
   <script>
     // 获取Bing每日一图
     async function setBingImg() {
@@ -344,55 +163,5 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       });
     });
   </script>
-</head>
-<body>
-  <!-- 顶部导航栏 -->
-  <div class="top-app-bar">
-    <div class="left">
-      <span class="material-icons">auto_stories</span>
-      NoWord - 没词
-    </div>
-    <div class="center">
-      <input class="search-box" type="text" placeholder="搜索方案/单词">
-      <button class="search-btn"><span class="material-icons">search</span>搜索</button>
-    </div>
-    <div class="right">
-      <?php if (isset($user['id'])): ?>
-        <span style="display:flex;align-items:center;gap:0.2em;"><span class="material-icons" style="font-size:1.1em;">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
-        <?php if (strpos($_SERVER['SCRIPT_NAME'], '/admin/') === false): ?>
-          <a href="/admin/" class="btn"><span class="material-icons">admin_panel_settings</span>后台管理</a>
-        <?php endif; ?>
-      <?php else: ?>
-        <a href="/login.php" class="btn"><span class="material-icons">login</span>登录</a>
-      <?php endif; ?>
-    </div>
-  </div>
-  <!-- Bing每日一图头图及一言 -->
-  <div style="position:relative;width:100vw;height:40vh;min-height:260px;max-height:480px;overflow:hidden;z-index:1;margin-top:var(--nav-height);">
-    <img id="bing-header-img" class="bing-header-img" src="" alt="Bing每日一图">
-    <div id="bing-header-mask" class="bing-header-mask"></div>
-  </div>
-  <!-- 主体内容 -->
-  <div class="main-content">
-    <div class="waterfall">
-      <?php foreach ($schemes as $s): ?>
-      <div class="card">
-        <div class="card-title"><?= htmlspecialchars($s['name']) ?></div>
-        <div class="card-desc">
-          <?php
-            $data = json_decode($s['data'] ?? '', true);
-            if (isset($data['words']) && is_array($data['words'])) {
-              $words = array_column($data['words'], 'word');
-              echo htmlspecialchars(implode('、', $words));
-            } else {
-              echo '无词汇';
-            }
-          ?>
-        </div>
-        <a class="card-btn" href="/present/index.php?id=<?= $s['id'] ?>"><span class="material-icons">play_circle</span>开始</a>
-      </div>
-      <?php endforeach; ?>
-    </div>
-  </div>
 </body>
 </html>

@@ -95,380 +95,23 @@ if (isset($_SESSION['user_id'])) {
   <title>编辑方案 - NoWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #ff9800;
-      --primary-dark: #c66900;
-      --primary-light: #ffd149;
-      --on-primary: #fff;
-      --surface: #fff;
-      --on-surface: #222;
-      --background: #f5f5f5;
-      --card: #fff;
-      --card-shadow: 0 2px 8px rgba(255,152,0,0.08);
-      --border-radius: 16px;
-      --nav-height: 64px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --primary: #ffb300;
-        --primary-dark: #c68400;
-        --primary-light: #ffe082;
-        --on-primary: #222;
-        --surface: #232323;
-        --on-surface: #eee;
-        --background: #181818;
-        --card: #232323;
-        --card-shadow: 0 2px 8px rgba(255,152,0,0.16);
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              dark: '#1e40af',
+              light: '#60a5fa',
+              pale: '#dbeafe',
+            }
+          }
+        }
       }
     }
-    body {
-      background: var(--background);
-      color: var(--on-surface);
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      min-height: 100vh;
-    }
-    .top-app-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--nav-height);
-      background: var(--primary);
-      color: var(--on-primary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      padding: 0 2vw;
-      font-family: 'Roboto', system-ui, sans-serif;
-    }
-    .top-app-bar .left {
-      font-size: 1.35em;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      user-select: none;
-    }
-    .top-app-bar .left .material-icons {
-      font-size: 1.3em;
-      vertical-align: middle;
-    }
-    .top-app-bar .center {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-width: 0;
-    }
-    .top-app-bar .right {
-      display: flex;
-      align-items: center;
-      gap: 1.2em;
-      font-size: 1em;
-      min-width: 120px;
-      justify-content: flex-end;
-    }
-    .top-app-bar .btn {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      padding: 0.5em 1.3em;
-      font-size: 1em;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s;
-      outline: none;
-      text-decoration: none;
-    }
-    .top-app-bar .btn:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-    }
-    .container {
-      width: 80vw;
-      max-width: 1200px;
-      min-width: 320px;
-      margin-top: calc(var(--nav-height) + 16px);
-      margin-left: auto;
-      margin-right: auto;
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 4px 24px rgba(56,142,60,0.10);
-      padding: 2.5rem 2rem 2rem 2rem;
-      border: 1.5px solid #c8e6c9;
-      overflow-x: auto;
-    }
-    h2 {
-      color: var(--primary-dark);
-      letter-spacing: 0.05em;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.2em;
-    }
-    a {
-      color: var(--primary-dark);
-      text-decoration: underline;
-      font-weight: 500;
-      font-size: 1.05em;
-      transition: color .2s;
-    }
-    a:hover {
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .settings {
-      margin-bottom: 2em;
-      display: flex;
-      flex-direction: column;
-      gap: 1em 2em;
-      align-items: flex-start;
-      background: var(--card);
-      border-radius: 10px;
-      padding: 1.2em 1em 0.7em 1em;
-      border: 1px solid var(--primary-light);
-    }
-    .settings label {
-      margin-right: 1.5em;
-      color: var(--primary-dark);
-      font-weight: 500;
-      font-size: 1em;
-      margin-bottom: 0.3em;
-    }
-    .settings input[type="text"], .settings input[type="number"] {
-      padding: 0.4em 0.7em;
-      border: 1px solid var(--primary-light);
-      border-radius: 7px;
-      background: #fff;
-      font-size: 1em;
-      margin-left: 0.3em;
-      width: 6em;
-      transition: border 0.2s;
-    }
-    .settings input[type="checkbox"] {
-      margin-right: 0.3em;
-      vertical-align: middle;
-    }
-    .settings input:focus {
-      border: 1.5px solid var(--primary-dark);
-      outline: none;
-      background: #fff8e1;
-    }
-    .table-scroll {
-      overflow-x: auto;
-      width: 100%;
-    }
-    table {
-      min-width: 900px;
-      width: max-content;
-      border-collapse: collapse;
-      margin-bottom: 2rem;
-      background: var(--card);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(255,152,0,0.06);
-    }
-    th, td {
-      padding: 0.3em 0.2em;
-      border-bottom: 1px solid #ffe0b2;
-      text-align: center;
-      font-size: 0.98em;
-      white-space: nowrap;
-    }
-    th {
-      color: var(--primary-dark);
-      background: #fff3e0;
-      font-weight: 600;
-      font-size: 1.05em;
-    }
-    table input[type="text"], table input[type="number"] {
-      padding: 0.4em 0.7em;
-      border: 1px solid var(--primary-light);
-      border-radius: 7px;
-      background: #fff;
-      font-size: 1em;
-      margin: 0.1em 0;
-      width: 7em;
-      transition: border 0.2s;
-    }
-    table input[type="text"]:focus, table input[type="number"]:focus {
-      border: 1.5px solid var(--primary-dark);
-      outline: none;
-      background: #fff8e1;
-    }
-    .word-actions {
-      display: flex;
-      gap: 0.3em;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: nowrap;
-    }
-    .word-actions button {
-      min-width: 0;
-      padding: 0.2em 0.7em;
-      font-size: 0.97em;
-      white-space: nowrap;
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 7px;
-      transition: background .2s, color .2s;
-    }
-    .word-actions button:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-    }
-    .get-methods {
-      display: flex;
-      gap: 1.2em;
-      align-items: center;
-      margin-bottom: 1.2em;
-      margin-top: 0.5em;
-    }
-    .get-methods label {
-      font-weight: 500;
-      color: var(--primary-dark);
-      margin-right: 0.7em;
-    }
-    .actions-row {
-      display: flex;
-      gap: 1.2em;
-      align-items: center;
-      margin-bottom: 1.5em;
-      margin-top: 0.5em;
-    }
-    .actions-row button, .actions-row input[type="file"] {
-      margin: 0;
-    }
-    .add-row, .actions-row button, .get-methods button {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 10px;
-      padding: 0.5em 1.5em;
-      font-size: 1em;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.3em;
-    }
-    .add-row:hover, .actions-row button:hover, .get-methods button:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    .actions-row input[type="file"] {
-      background: #fff;
-      color: var(--primary-dark);
-      border: 1.5px solid var(--primary-light);
-      border-radius: 7px;
-      padding: 0.38em 1em;
-      font-size: 1em;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .2s, color .2s, border .2s, box-shadow .2s;
-      margin: 0 0.5em 0 0.5em;
-      outline: none;
-      box-shadow: 0 1px 4px rgba(255,152,0,0.07);
-      min-width: 180px;
-      max-width: 320px;
-    }
-    .actions-row input[type="file"]:hover, .actions-row input[type="file"]:focus {
-      background: #fff3e0;
-      color: var(--primary);
-      border-color: var(--primary);
-      box-shadow: 0 2px 8px var(--primary-light);
-    }
-    .file-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5em;
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border-radius: 10px;
-      padding: 0.5em 1.5em;
-      font-size: 1em;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-      border: none;
-      margin: 0 0.5em 0 0.5em;
-      user-select: none;
-    }
-    .file-label:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    .file-label input[type="file"] {
-      display: none;
-    }
-    .file-filename {
-      font-size: 0.98em;
-      color: var(--primary-dark);
-      margin-left: 0.5em;
-      max-width: 180px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      vertical-align: middle;
-      display: inline-block;
-    }
-    @media (prefers-color-scheme: dark) {
-      .file-label {
-        background: #37474f;
-        color: #ffb300;
-      }
-      .file-label:hover {
-        background: #ffb300;
-        color: #232323;
-      }
-      .file-filename {
-        color: #ffb300;
-      }
-    }
-    .msg {
-      margin-bottom: 1em;
-      padding: 0.7em 1em;
-      border-radius: 8px;
-      font-size: 1em;
-      text-align: center;
-      background: #fff3e0;
-      color: var(--primary-dark);
-      border: 1px solid var(--primary-light);
-    }
-    @media (max-width: 900px) {
-      .container { width: 99vw; padding: 1.2rem 0.2rem; }
-      table { min-width: 700px; }
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
-      .container { background: #232d23; border: 1.5px solid #37474f; }
-      table { background: #232d23; color: #eee; }
-      th { background: #263238; color: #ffb300; }
-      .msg { background: #263238; color: #ffb300; border: 1px solid #c68400; }
-      input, .settings input, .settings label, .settings input[type="number"], .settings input[type="text"] { background: #232d23; color: #eee; border: 1px solid #37474f; }
-      input:focus, .settings input:focus, .settings input[type="number"]:focus, .settings input[type="text"]:focus { background: #263238; border: 1.5px solid #ffb300; }
-      td button[type="button"], .word-actions button { background: #37474f; color: #ffb300; border: none; }
-      td button[type="button"]:hover, .word-actions button:hover { background: #ffb300; color: #232323; }
-    }
-  </style>
+  </script>
   <script>
     function addRow() {
       const table = document.getElementById('words-table');
@@ -476,13 +119,14 @@ if (isset($_SESSION['user_id'])) {
       const fields = ['word','uk_phonetic','uk_audio','us_phonetic','us_audio','cn'];
       for (let i = 0; i < fields.length; ++i) {
         let cell = row.insertCell(-1);
-        cell.innerHTML = '<input type="text" name="'+fields[i]+'[]" />';
+        // 应用 tailwind 样式
+        cell.innerHTML = '<input type="text" name="'+fields[i]+'[]" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28" />';
       }
       let cell = row.insertCell(-1);
-      cell.className = 'word-actions';
-      cell.innerHTML = '' +
-        '<button type="button" class="btn" onclick="delRow(this)">删除</button> ' +
-        '<button type="button" class="btn" onclick="fetchWordInfo(this)">一键获取</button>';
+      cell.className = 'flex gap-2 items-center';
+      cell.innerHTML =
+        '<button type="button" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150" onclick="delRow(this)">删除</button>' +
+        '<button type="button" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150" onclick="fetchWordInfo(this)">一键获取</button>';
     }
     function delRow(btn) {
       const row = btn.parentNode.parentNode;
@@ -727,91 +371,92 @@ if (isset($_SESSION['user_id'])) {
     }
   </script>
 </head>
-<body>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
   <!-- 顶部导航栏 -->
-  <div class="top-app-bar">
-    <div class="left">
-      <span class="material-icons">auto_stories</span>
+  <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
+    <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
+      <span class="material-icons text-2xl">auto_stories</span>
       NoWord - 没词
     </div>
-    <div class="center">
-      <a href="/" class="btn"><span class="material-icons">home</span>回到首页</a>
+    <div class="flex-1 flex justify-center items-center min-w-0">
+      <a href="/" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">home</span>回到首页</a>
     </div>
-    <div class="right">
+    <div class="flex items-center gap-6 min-w-[120px] justify-end">
       <?php if (isset($user['id'])): ?>
-        <span style="display:flex;align-items:center;gap:0.2em;"><span class="material-icons" style="font-size:1.1em;">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
+        <span class="flex items-center gap-2 text-base"><span class="material-icons text-lg">person</span>您好，<?= htmlspecialchars($user['username']) ?></span>
       <?php else: ?>
-        <a href="/login.php" class="btn"><span class="material-icons">login</span>登录</a>
+        <a href="/login.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">login</span>登录</a>
       <?php endif; ?>
     </div>
   </div>
   <!-- 页面内容 -->
-  <div class="container">
-    <h2>编辑方案</h2>
-    <a href="schemes.php">← 返回方案管理</a>
-    <?php if ($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+  <div class="w-[80vw] max-w-[1200px] min-w-[320px] mx-auto mt-24 mb-8 bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-10 border border-primary-light backdrop-blur-md">
+    <h2 class="text-2xl font-bold text-primary-dark dark:text-primary-light text-center mb-8">编辑方案</h2>
+    <a href="schemes.php" class="inline-block mb-4 text-primary-dark hover:text-primary-light underline">← 返回方案管理</a>
+    <?php if ($msg): ?><div class="mb-4 p-3 rounded-lg text-base text-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-primary-light dark:border-primary-dark"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data">
       <input type="hidden" name="id" value="<?= $id ?>">
-      <div class="settings">
-        <div class="settings-row">
-          <label>方案名称 <input type="text" name="name" value="<?= htmlspecialchars($scheme['name']) ?>" required></label>
-          <label>字号 <input type="number" name="font_size" value="<?= htmlspecialchars($settings['font_size'] ?? 36) ?>" min="12" max="120" style="width:4em;"></label>
+      <div class="flex flex-col gap-6 mb-8 bg-primary-pale/60 dark:bg-blue-900/60 rounded-xl p-6 border border-primary-light">
+        <div class="flex flex-wrap gap-8 items-center">
+          <label class="font-medium text-primary-dark dark:text-primary-light">方案名称 <input type="text" name="name" value="<?= htmlspecialchars($scheme['name']) ?>" required class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none"></label>
+          <label class="font-medium text-primary-dark dark:text-primary-light">字号 <input type="number" name="font_size" value="<?= htmlspecialchars($settings['font_size'] ?? 36) ?>" min="12" max="120" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
         </div>
-        <div class="settings-row">
-          <label>轮数 <input type="number" name="rounds" value="<?= htmlspecialchars($settings['rounds'] ?? 1) ?>" min="1" style="width:4em;"></label>
-          <label>每词重复 <input type="number" name="repeat" value="<?= htmlspecialchars($settings['repeat'] ?? 1) ?>" min="1" style="width:4em;"></label>
-          <label>等待时长(s) <input type="number" name="wait" value="<?= htmlspecialchars($settings['wait'] ?? 1) ?>" min="0" style="width:4em;"></label>
+        <div class="flex flex-wrap gap-8 items-center">
+          <label class="font-medium text-primary-dark dark:text-primary-light">轮数 <input type="number" name="rounds" value="<?= htmlspecialchars($settings['rounds'] ?? 1) ?>" min="1" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
+          <label class="font-medium text-primary-dark dark:text-primary-light">每词重复 <input type="number" name="repeat" value="<?= htmlspecialchars($settings['repeat'] ?? 1) ?>" min="1" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
+          <label class="font-medium text-primary-dark dark:text-primary-light">等待时长(s) <input type="number" name="wait" value="<?= htmlspecialchars($settings['wait'] ?? 1) ?>" min="0" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
         </div>
-        <div class="settings-row">
-          <label><input type="checkbox" name="show_cn" value="1" <?= !empty($settings['show_cn'])?'checked':'' ?>>显示中文</label>
-          <label><input type="checkbox" name="shuffle" value="1" <?= !empty($settings['shuffle'])?'checked':'' ?>>乱序</label>
-          <label><input type="checkbox" name="show_phonetic" value="1" <?= !empty($settings['show_phonetic'])?'checked':'' ?>>显示音标</label>
+        <div class="flex flex-wrap gap-8 items-center">
+          <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="show_cn" value="1" <?= !empty($settings['show_cn'])?'checked':'' ?> class="mr-2">显示中文</label>
+          <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="shuffle" value="1" <?= !empty($settings['shuffle'])?'checked':'' ?> class="mr-2">乱序</label>
+          <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="show_phonetic" value="1" <?= !empty($settings['show_phonetic'])?'checked':'' ?> class="mr-2">显示音标</label>
         </div>
       </div>
-      <div class="get-methods">
-        <label>获取方式：</label>
-        <label><input type="radio" name="get_method" value="auto" checked>自动（推荐）</label>
-        <label><input type="radio" name="get_method" value="appworlds">AppWorlds</label>
-        <label><input type="radio" name="get_method" value="baidu">百度翻译</label>
-        <label><input type="radio" name="get_method" value="google">Google翻译</label>
-        <button type="button" onclick="fetchAllWordInfo()">批量一键填充</button>
+      <div class="flex gap-6 items-center mb-6">
+        <label class="font-medium text-primary-dark dark:text-primary-light">获取方式：</label>
+        <label class="font-medium"><input type="radio" name="get_method" value="auto" checked class="mr-1">自动（推荐）</label>
+        <label class="font-medium"><input type="radio" name="get_method" value="appworlds" class="mr-1">AppWorlds</label>
+        <label class="font-medium"><input type="radio" name="get_method" value="baidu" class="mr-1">百度翻译</label>
+        <label class="font-medium"><input type="radio" name="get_method" value="google" class="mr-1">Google翻译</label>
+        <button type="button" onclick="fetchAllWordInfo()" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150">批量一键填充</button>
       </div>
-      <div class="table-scroll">
-      <table id="words-table">
-        <tr>
-          <th>单词</th>
-          <th>英式音标</th>
-          <th>英式发音</th>
-          <th>美式音标</th>
-          <th>美式发音</th>
-          <th>中文翻译</th>
-          <th>操作</th>
-        </tr>
-        <?php foreach ($words as $i => $w): ?>
-        <tr>
-          <td><input type="text" name="word[]" value="<?= htmlspecialchars($w['word']) ?>" required></td>
-          <td><input type="text" name="uk_phonetic[]" value="<?= htmlspecialchars($w['uk_phonetic']) ?>"></td>
-          <td><input type="text" name="uk_audio[]" value="<?= htmlspecialchars($w['uk_audio']) ?>"></td>
-          <td><input type="text" name="us_phonetic[]" value="<?= htmlspecialchars($w['us_phonetic']) ?>"></td>
-          <td><input type="text" name="us_audio[]" value="<?= htmlspecialchars($w['us_audio']) ?>"></td>
-          <td><input type="text" name="cn[]" value="<?= htmlspecialchars($w['cn']) ?>"></td>
-          <td class="word-actions">
-            <button type="button" class="btn" onclick="delRow(this)">删除</button>
-            <button type="button" class="btn" onclick="fetchWordInfo(this)">一键获取</button>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-      </table>
+      <div class="overflow-x-auto mb-6">
+        <table id="words-table" class="min-w-[900px] w-full border-collapse rounded-xl shadow bg-white dark:bg-blue-950">
+          <tr>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">单词</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">英式音标</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">英式发音</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">美式音标</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">美式发音</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">中文翻译</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold">操作</th>
+          </tr>
+          <?php foreach ($words as $i => $w): ?>
+          <tr class="<?= $i % 2 === 0 ? 'bg-white dark:bg-blue-950' : 'bg-primary-pale/60 dark:bg-blue-900/60' ?> hover:bg-primary-pale/70">
+            <td><input type="text" name="word[]" value="<?= htmlspecialchars($w['word']) ?>" required class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28"></td>
+            <td><input type="text" name="uk_phonetic[]" value="<?= htmlspecialchars($w['uk_phonetic']) ?>" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28"></td>
+            <td><input type="text" name="uk_audio[]" value="<?= htmlspecialchars($w['uk_audio']) ?>" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28"></td>
+            <td><input type="text" name="us_phonetic[]" value="<?= htmlspecialchars($w['us_phonetic']) ?>" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28"></td>
+            <td><input type="text" name="us_audio[]" value="<?= htmlspecialchars($w['us_audio']) ?>" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28"></td>
+            <td><input type="text" name="cn[]" value="<?= htmlspecialchars($w['cn']) ?>" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-32"></td>
+            <td class="flex gap-2 items-center">
+              <button type="button" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150" onclick="delRow(this)">删除</button>
+              <button type="button" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-lg px-3 py-1 text-sm font-semibold shadow transition-all duration-150" onclick="fetchWordInfo(this)">一键获取</button>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+        </table>
       </div>
-      <div class="actions-row">
-        <button type="button" class="add-row" onclick="addRow()">添加词汇</button>
-        <label class="file-label"><span class="material-icons" style="font-size:1.1em;">upload_file</span>选择文件
-          <input type="file" id="import-file" name="import_file" accept=".json,.csv" onchange="showFileName(this)">
+      <div class="flex flex-wrap gap-4 items-center mb-6">
+        <button type="button" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150" onclick="addRow()">添加词汇</button>
+        <label class="flex items-center gap-2 bg-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow cursor-pointer transition-all duration-150 hover:bg-primary-light hover:text-primary-dark">
+          <span class="material-icons text-base">upload_file</span>选择文件
+          <input type="file" id="import-file" name="import_file" accept=".json,.csv" onchange="showFileName(this)" class="hidden">
         </label>
-        <span class="file-filename" id="file-filename"></span>
-        <button type="button" onclick="importWords()">导入</button>
-        <button type="button" onclick="exportWords()">导出</button>
-        <button type="submit" name="save">保存</button>
+        <span class="text-primary-dark dark:text-primary-light" id="file-filename"></span>
+        <button type="button" onclick="importWords()" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150">导入</button>
+        <button type="button" onclick="exportWords()" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150">导出</button>
+        <button type="submit" name="save" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 font-semibold shadow transition-all duration-150">保存</button>
       </div>
     </form>
   </div>

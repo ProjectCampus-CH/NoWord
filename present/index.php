@@ -51,345 +51,54 @@ $font_size = $settings['font_size'] ?? 36;
   <title>放映 - <?= htmlspecialchars($scheme['name']) ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/@material/web@1.0.0/dist/material-web.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              dark: '#1e40af',
+              light: '#60a5fa',
+              pale: '#dbeafe',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    html, body {
-      height:100%;
-      margin:0;
-      padding:0;
-      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-      color: #222;
-      font-family: system-ui, sans-serif;
-    }
-    body {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-    }
-    #main {
-      width:100vw;
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-    }
-    .word {
-      font-size: <?= intval($font_size) ?>px;
-      font-weight: bold;
-      margin-bottom: 0.5em;
-      color: var(--primary-dark);
-      letter-spacing: 0.04em;
-      text-shadow: 0 2px 8px rgba(255,152,0,0.08);
-      transition: font-size 0.3s, color 0.3s, text-shadow 0.3s;
-      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
-    }
-    .phonetic {
-      font-size: <?= intval($font_size/2) ?>px;
-      color: var(--primary);
-      margin-bottom: 0.5em;
-      letter-spacing: 0.02em;
-      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
-    }
-    .cn {
-      font-size: <?= intval($font_size/2.2) ?>px;
-      color: #666;
-      margin-bottom: 1em;
-      letter-spacing: 0.01em;
-      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
-    }
-    .progress {
-      color: var(--primary-dark);
-      font-size:1.1em;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      margin-left: 1em;
-      margin-right: 0.5em;
-      white-space:nowrap;
-      max-width: 60vw;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: inline-block;
-      vertical-align: middle;
-      transition: color 0.3s;
-      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
-    }
-    .preload-tip {
-      font-size: 20px;
-      color: var(--on-primary);
-      background: var(--primary-dark);
-      padding: 0.4em 1.2em;
-      border-radius: 10px;
-      margin-top: 1em;
-      margin-bottom: 1em;
-      box-shadow: 0 2px 8px var(--primary-light);
-      display: inline-block;
-      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
-    }
-    .finish-tip {
-      font-size: 32px;
-      color: var(--on-primary);
-      background: var(--primary);
-      padding: 0.5em 1.5em;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px var(--primary-light);
-      display: inline-block;
-      animation: fadeInScale 0.7s cubic-bezier(.4,2,.6,1) both, pulse 1.2s infinite alternate;
-    }
-    @keyframes fadeInScale {
-      0% { opacity: 0; transform: scale(0.7); }
-      80% { opacity: 1; transform: scale(1.08); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 2px 16px var(--primary-light); }
-      100% { box-shadow: 0 6px 32px var(--primary); }
-    }
-    .preload-bar {
-      width: 180px;
-      height: 8px;
-      background: #eee;
-      border-radius: 5px;
-      margin: 0.5em auto 0.2em auto;
-      overflow: hidden;
-      position: relative;
-      display: block;
-      animation: fadeInScale 0.5s cubic-bezier(.4,2,.6,1) both;
-    }
-    .preload-bar-inner {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary-dark) 60%, var(--primary-light) 100%);
-      border-radius: 5px;
-      transition: width 0.2s;
-    }
-    .topbar {
-      position:fixed;
-      top:0;
-      right:0;
-      left:auto;
-      width:auto;
-      min-width:320px;
-      max-width:98vw;
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      padding:1em 2em 1em 2em;
-      background: rgba(255,235,205,0.97);
-      box-shadow: 0 2px 8px rgba(255,152,0,0.07);
-      z-index: 10;
-    }
-    .controls {
-      position:fixed;
-      bottom:2em;
-      left:0;
-      width:100vw;
-      display:flex;
-      justify-content:center;
-      gap:2em;
-      z-index: 10;
-    }
-    .btn {
-      background: var(--primary-dark);
-      color: var(--on-primary);
-      border:none;
-      border-radius:10px;
-      padding:0.7em 2em;
-      font-size:1.1em;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      cursor:pointer;
-      box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-      transition: background .2s, box-shadow .2s, transform .2s;
-    }
-    .btn:hover {
-      background: var(--primary-light);
-      color: var(--on-surface);
-      box-shadow: 0 4px 16px rgba(255,152,0,0.18);
-      transform: scale(1.04);
-    }
-    .fs-btn {
-      background:transparent;
-      border:none;
-      color: var(--primary-dark);
-      font-size:1.5em;
-      cursor:pointer;
-      transition: color .2s;
-    }
-    .fs-btn:hover {
-      color: var(--primary);
-    }
-    .font-size-bar {
-      position:fixed;
-      right:2em;
-      bottom:2em;
-      background:#fff;
-      border-radius:8px;
-      box-shadow:0 2px 8px var(--primary-light);
-      padding:0.5em 1em;
-      font-size: 1.05em;
-      color: var(--primary-dark);
-      border: 1.5px solid var(--primary-light);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-    }
-    .font-size-bar input[type="range"] {
-      accent-color: var(--primary);
-      height: 4px;
-      border-radius: 3px;
-      outline: none;
-      background: #ffe0b2;
-      margin: 0 0.5em;
-      width: 120px;
-      transition: background 0.2s;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    .font-size-bar input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      margin-top: -7px;
-      /* 使滑块垂直居中 */
-      border-radius: 50%;
-      background: var(--primary-dark);
-      box-shadow: 0 2px 8px var(--primary-light);
-      cursor: pointer;
-      border: 2px solid #fff;
-      transition: background 0.2s;
-    }
-    .font-size-bar input[type="range"]:hover::-webkit-slider-thumb {
-      background: var(--primary);
-    }
-    .font-size-bar input[type="range"]::-webkit-slider-runnable-track {
-      height: 4px;
-      border-radius: 3px;
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]::-ms-fill-lower {
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]::-ms-fill-upper {
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px var(--primary-light);
-    }
-    .font-size-bar input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--primary-dark);
-      box-shadow: 0 2px 8px var(--primary-light);
-      cursor: pointer;
-      border: 2px solid #fff;
-      transition: background 0.2s;
-    }
-    .font-size-bar input[type="range"]:hover::-moz-range-thumb {
-      background: var(--primary);
-    }
-    .font-size-bar input[type="range"]::-moz-range-track {
-      height: 4px;
-      border-radius: 3px;
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]::-ms-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--primary-dark);
-      box-shadow: 0 2px 8px var(--primary-light);
-      cursor: pointer;
-      border: 2px solid #fff;
-      transition: background 0.2s;
-    }
-    .font-size-bar input[type="range"]:hover::-ms-thumb {
-      background: var(--primary);
-    }
-    .font-size-bar input[type="range"]::-ms-fill-lower,
-    .font-size-bar input[type="range"]::-ms-fill-upper {
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]:focus::-ms-fill-lower {
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]:focus::-ms-fill-upper {
-      background: #ffe0b2;
-    }
-    .font-size-bar input[type="range"]::-ms-tooltip {
-      display: none;
-    }
-    .font-size-bar input[type="range"]:focus {
-      outline: none;
-    }
-    /* 兼容Firefox */
-    .font-size-bar input[type="range"] {
-      background: #ffe0b2;
-    }
-    @media (prefers-color-scheme: dark) {
-      .font-size-bar input[type="range"] {
-        background: #37474f;
-      }
-      .font-size-bar input[type="range"]::-webkit-slider-thumb {
-        background: #ffb300;
-        border: 2px solid #232323;
-      }
-      .font-size-bar input[type="range"]:hover::-webkit-slider-thumb {
-        background: #ffd149;
-      }
-      .font-size-bar input[type="range"]::-webkit-slider-runnable-track {
-        background: #37474f;
-      }
-      .font-size-bar input[type="range"]::-moz-range-thumb {
-        background: #ffb300;
-        border: 2px solid #232323;
-      }
-      .font-size-bar input[type="range"]:hover::-moz-range-thumb {
-        background: #ffd149;
-      }
-      .font-size-bar input[type="range"]::-moz-range-track {
-        background: #37474f;
-      }
-      .font-size-bar input[type="range"]::-ms-thumb {
-        background: #ffb300;
-        border: 2px solid #232323;
-      }
-      .font-size-bar input[type="range"]:hover::-ms-thumb {
-        background: #ffd149;
-      }
-      .font-size-bar input[type="range"]::-ms-fill-lower,
-      .font-size-bar input[type="range"]::-ms-fill-upper {
-        background: #37474f;
-      }
-    }
+    body { overscroll-behavior-y: none; }
   </style>
 </head>
-<body>
-  <div class="topbar">
-    <span class="progress" id="progress"></span>
-    <button class="fs-btn" id="fs-btn" title="全屏" style="margin-left:1em;">⛶</button>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans flex flex-col items-center justify-center">
+  <div class="fixed top-0 right-0 left-0 flex items-center justify-between px-8 h-16 bg-primary text-white shadow-lg z-50">
+    <span class="font-bold text-lg tracking-wide flex items-center gap-2">
+      <span class="material-icons text-xl">slideshow</span>
+      <span id="progress"></span>
+    </span>
+    <button class="ml-4 text-2xl hover:text-primary-light transition" id="fs-btn" title="全屏">⛶</button>
   </div>
-  <div id="main">
-    <div class="word" id="word"></div>
+  <div id="main" class="flex flex-col items-center justify-center w-screen h-screen pt-16">
+    <div id="word" class="font-bold mb-2 text-primary-dark dark:text-primary-light transition-all duration-300" style="font-size: <?= intval($font_size) ?>px;"></div>
     <?php if ($show_phonetic): ?>
-    <div class="phonetic" id="phonetic"></div>
+    <div id="phonetic" class="mb-2 text-primary text-center transition-all duration-300" style="font-size: <?= intval($font_size/2) ?>px;"></div>
     <?php endif; ?>
     <?php if ($show_cn): ?>
-    <div class="cn" id="cn"></div>
+    <div id="cn" class="mb-4 text-blue-700 dark:text-blue-200 text-center transition-all duration-300" style="font-size: <?= intval($font_size/2.2) ?>px;"></div>
     <?php endif; ?>
   </div>
-  <div class="controls" id="controls" style="display:none;">
-    <button class="btn" id="done-btn" onclick="location.href='/'">完成</button>
-    <button class="btn" id="restart-btn" onclick="restart()">再来一遍</button>
-    <button class="btn" id="pause-btn" onclick="togglePause()">暂停</button>
+  <div id="controls" class="fixed bottom-8 left-0 w-full flex justify-center gap-6 z-50" style="display:none;">
+    <button id="done-btn" onclick="location.href='/'" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-8 py-3 font-semibold shadow transition-all duration-150">完成</button>
+    <button id="restart-btn" onclick="restart()" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-8 py-3 font-semibold shadow transition-all duration-150">再来一遍</button>
+    <button id="pause-btn" onclick="togglePause()" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-8 py-3 font-semibold shadow transition-all duration-150">暂停</button>
   </div>
-  <div class="font-size-bar">
-    字号 <input type="range" min="18" max="120" value="<?= intval($font_size) ?>" id="font-size-range" style="vertical-align:middle;">
-    <span id="font-size-val"><?= intval($font_size) ?></span>
+  <div class="fixed right-8 bottom-8 bg-white/90 dark:bg-blue-950/80 rounded-xl shadow-lg px-4 py-2 flex items-center gap-2 border border-primary-light z-50">
+    字号
+    <input type="range" min="18" max="120" value="<?= intval($font_size) ?>" id="font-size-range" class="accent-primary w-32 mx-2">
+    <span id="font-size-val" class="font-semibold text-primary-dark dark:text-primary-light"><?= intval($font_size) ?></span>
   </div>
   <script>
     const wordsRaw = <?= json_encode($words, JSON_UNESCAPED_UNICODE) ?>;
