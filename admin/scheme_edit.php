@@ -115,11 +115,16 @@ if (isset($_SESSION['user_id'])) {
   <script>
     function addRow() {
       const table = document.getElementById('words-table');
+      const rowCount = table.rows.length - 1; // -1 for header
+      const isEven = rowCount % 2 === 0;
+      const trClass = isEven
+        ? 'bg-white dark:bg-blue-950 hover:bg-primary-pale/70'
+        : 'bg-primary-pale/60 dark:bg-blue-900/60 hover:bg-primary-pale/70';
       const row = table.insertRow(-1);
+      row.className = trClass;
       const fields = ['word','uk_phonetic','uk_audio','us_phonetic','us_audio','cn'];
       for (let i = 0; i < fields.length; ++i) {
         let cell = row.insertCell(-1);
-        // 应用 tailwind 样式
         cell.innerHTML = '<input type="text" name="'+fields[i]+'[]" class="px-2 py-1 border border-primary-light rounded bg-white focus:border-primary-dark focus:outline-none w-28" />';
       }
       let cell = row.insertCell(-1);

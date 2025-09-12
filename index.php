@@ -126,7 +126,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
     // 获取一言
     async function setHitokoto() {
       try {
-        let resp = await fetch('https://v1.hitokoto.cn/?encode=json');
+        let resp = await fetch('https://international.v1.hitokoto.cn/?encode=json');
         let data = await resp.json();
         let text = data.hitokoto;
         let from = data.from ? `—— ${data.from}` : '';
