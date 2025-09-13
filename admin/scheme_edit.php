@@ -113,6 +113,18 @@ if (isset($_SESSION['user_id'])) {
     }
   </script>
   <script>
+    // 支持自定义API地址
+    let customPhoneticApi = localStorage.getItem('customPhoneticApi') || '/api/phonetic';
+
+    function setCustomPhoneticApi() {
+      const url = prompt('请输入自定义音标/翻译API地址（如 http://localhost:5000/api/phonetic ）', customPhoneticApi);
+      if (url) {
+        customPhoneticApi = url;
+        localStorage.setItem('customPhoneticApi', url);
+        alert('已设置自定义API地址：' + url);
+      }
+    }
+
     function addRow() {
       const table = document.getElementById('words-table');
       const rowCount = table.rows.length - 1; // -1 for header
@@ -138,9 +150,8 @@ if (isset($_SESSION['user_id'])) {
       row.parentNode.removeChild(row);
     }
 
-    // 一键获取词汇信息
+    // 使用自定义API获取词汇信息
     async function fetchWordInfo(btn, method) {
-      // 获取当前行
       const row = btn.parentNode.parentNode;
       const wordInput = row.querySelector('input[name="word[]"]');
       if (!wordInput || !wordInput.value.trim()) {
@@ -151,91 +162,21 @@ if (isset($_SESSION['user_id'])) {
       btn.disabled = true;
       btn.textContent = '获取中...';
       try {
-        let uk_phonetic = '';
-        let uk_audio = '';
-        let us_phonetic = '';
-        let us_audio = '';
-        let cn = '';
-        // 先用 dictionaryapi.dev 获取英文释义和音标
-        let resp = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word));
-        if (resp.ok) {
-          const data = await resp.json();
-          if (Array.isArray(data) && data.length > 0) {
-            const entry = data[0];
-            if (entry.phonetics && entry.phonetics.length > 0) {
-              for (const ph of entry.phonetics) {
-                if (ph.audio && ph.audio.includes('uk.mp3')) {
-                  uk_audio = ph.audio;
-                  if (ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
-                }
-                if (ph.audio && ph.audio.includes('us.mp3')) {
-                  us_audio = ph.audio;
-                  if (ph.text) us_phonetic = ph.text.replace(/[\[\]]/g, '');
-                }
-                if (!uk_audio && ph.audio) uk_audio = ph.audio;
-                if (!uk_phonetic && ph.text) uk_phonetic = ph.text.replace(/[\[\]]/g, '');
-              }
-            }
-            // 英文释义
-            if (entry.meanings && entry.meanings.length > 0) {
-              const defs = [];
-              for (const m of entry.meanings) {
-                if (m.definitions && m.definitions.length > 0) {
-                  defs.push(m.definitions[0].definition);
-                }
-              }
-              cn = defs.join('; ');
-            }
-          }
-        }
-        // 翻译源切换
-        if (!method) {
-          const checked = document.querySelector('input[name="get_method"]:checked');
-          method = checked ? checked.value : 'auto';
-        }
-        let methodUsed = 1;
-        if (method === 'auto' || method === 'appworlds') {
-          try {
-            let appworldsResp = await fetch('https://translate.appworlds.cn?text=' + encodeURIComponent(word) + '&from=en&to=zh-CN');
-            if (appworldsResp.ok) {
-              let appworldsData = await appworldsResp.json();
-              if (appworldsData && appworldsData.code === 200 && appworldsData.data) {
-                cn = appworldsData.data;
-                methodUsed = 1;
-              }
-            }
-          } catch (e) {}
-        }
-        if ((method === 'baidu' || (!cn || cn.trim() === '') && method !== 'google') && methodUsed !== 2) {
-          try {
-            let baiduResp = await fetch('https://fanyi.baidu.com/sug', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: 'kw=' + encodeURIComponent(word)
-            });
-            if (baiduResp.ok) {
-              let baiduData = await baiduResp.json();
-              if (baiduData && baiduData.data && baiduData.data.length > 0) {
-                cn = baiduData.data[0].v;
-                methodUsed = 2;
-              }
-            }
-          } catch (e) {}
-        }
-        if ((method === 'google' || (!cn || cn.trim() === '')) && methodUsed !== 3) {
-          try {
-            let googleResp = await fetch('https://translate.google.com/?sl=en&tl=zh-CN&text=' + encodeURIComponent(word) + '&op=translate');
-            if (googleResp.ok) {
-              let html = await googleResp.text();
-              let match = html.match(/<span[^>]+jsname="W297wb"[^>]*>(.*?)<\/span>/);
-              if (match && match[1]) {
-                cn = match[1].replace(/<[^>]+>/g, '').trim();
-                methodUsed = 3;
-              }
-            }
-          } catch (e) {}
-        }
-        // 填充到输入框
+        // 优先用自定义API
+        let apiUrl = customPhoneticApi;
+        if (!apiUrl) apiUrl = '/api/phonetic';
+        let resp = await fetch(apiUrl + '?word=' + encodeURIComponent(word));
+        if (!resp.ok) throw new Error('API请求失败');
+        let data = await resp.json();
+        if (data.error) throw new Error(data.error);
+
+        // 兼容返回字段
+        const uk_phonetic = data.uk_ipa || data.uk_phonetic || '';
+        const us_phonetic = data.us_ipa || data.us_phonetic || '';
+        const uk_audio = data.uk_audio || '';
+        const us_audio = data.us_audio || '';
+        const cn = data.cn || data.translation || '';
+
         const inputs = row.querySelectorAll('input');
         for (let input of inputs) {
           if (input.name === 'uk_phonetic[]') input.value = uk_phonetic;
@@ -246,7 +187,7 @@ if (isset($_SESSION['user_id'])) {
         }
         btn.textContent = '一键获取';
       } catch (e) {
-        alert('获取失败，请手动填写。');
+        alert('获取失败，请手动填写。\n' + (e.message || e));
         btn.textContent = '一键获取';
       }
       btn.disabled = false;
@@ -385,6 +326,7 @@ if (isset($_SESSION['user_id'])) {
     </div>
     <div class="flex-1 flex justify-center items-center min-w-0">
       <a href="/" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">home</span>回到首页</a>
+      <button type="button" onclick="setCustomPhoneticApi()" class="ml-6 bg-primary-light hover:bg-primary-dark text-primary-dark hover:text-white rounded-xl px-4 py-2 font-semibold shadow transition-all duration-150">设置API</button>
     </div>
     <div class="flex items-center gap-6 min-w-[120px] justify-end">
       <?php if (isset($user['id'])): ?>

@@ -82,12 +82,12 @@ $font_size = $settings['font_size'] ?? 36;
     <button class="ml-4 text-2xl hover:text-primary-light transition" id="fs-btn" title="全屏">⛶</button>
   </div>
   <div id="main" class="flex flex-col items-center justify-center w-screen h-screen pt-16">
-    <div id="word" class="font-bold mb-2 text-primary-dark dark:text-primary-light transition-all duration-300" style="font-size: <?= intval($font_size) ?>px;"></div>
+    <div id="word" class="font-bold mb-2 text-primary-dark dark:text-primary-light transition-all duration-300 break-words text-center max-w-[90vw] overflow-x-auto" style="font-size: <?= intval($font_size) ?>px;"></div>
     <?php if ($show_phonetic): ?>
-    <div id="phonetic" class="mb-2 text-primary text-center transition-all duration-300" style="font-size: <?= intval($font_size/2) ?>px;"></div>
+    <div id="phonetic" class="mb-2 text-primary text-center transition-all duration-300 break-words max-w-[80vw] overflow-x-auto" style="font-size: <?= intval($font_size/2) ?>px;"></div>
     <?php endif; ?>
     <?php if ($show_cn): ?>
-    <div id="cn" class="mb-4 text-blue-700 dark:text-blue-200 text-center transition-all duration-300" style="font-size: <?= intval($font_size/2.2) ?>px;"></div>
+    <div id="cn" class="mb-4 text-blue-700 dark:text-blue-200 text-center transition-all duration-300 break-words max-w-[80vw] overflow-x-auto" style="font-size: <?= intval($font_size/2.2) ?>px;"></div>
     <?php endif; ?>
   </div>
   <div id="controls" class="fixed bottom-8 left-0 w-full flex justify-center gap-6 z-50" style="display:none;">
@@ -96,7 +96,7 @@ $font_size = $settings['font_size'] ?? 36;
     <button id="pause-btn" onclick="togglePause()" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-8 py-3 font-semibold shadow transition-all duration-150">暂停</button>
   </div>
   <div class="fixed right-8 bottom-8 bg-white/90 dark:bg-blue-950/80 rounded-xl shadow-lg px-4 py-2 flex items-center gap-2 border border-primary-light z-50">
-    字号
+    <span class="font-medium text-primary-dark dark:text-primary-light">字号</span>
     <input type="range" min="18" max="120" value="<?= intval($font_size) ?>" id="font-size-range" class="accent-primary w-32 mx-2">
     <span id="font-size-val" class="font-semibold text-primary-dark dark:text-primary-light"><?= intval($font_size) ?></span>
   </div>
@@ -118,6 +118,7 @@ $font_size = $settings['font_size'] ?? 36;
     let _pendingPlay = null;
     let _countdownTimer = null;
     let roundCount = 0;
+    let _currentIdx = 0; // 新增
 
     function shuffleArr(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
@@ -140,17 +141,20 @@ $font_size = $settings['font_size'] ?? 36;
       let countdown = 3;
       document.getElementById('controls').style.display = 'none';
       document.getElementById('progress').textContent = '';
-      document.getElementById('word').textContent = '';
+      document.getElementById('word').innerHTML = '';
       if (show_phonetic) document.getElementById('phonetic').textContent = '';
       if (show_cn) document.getElementById('cn').textContent = '';
       function tick() {
         if (countdown > 0) {
-          document.getElementById('word').textContent = countdown;
-          document.getElementById('word').classList.add('word');
+          document.getElementById('word').innerHTML =
+            `<div class="flex flex-col items-center justify-center animate-bounce">
+              <span class="inline-block bg-primary text-white rounded-full w-24 h-24 flex items-center justify-center text-5xl font-extrabold shadow-lg mb-2">${countdown}</span>
+              <span class="text-primary-dark dark:text-primary-light text-lg font-semibold mt-2">即将开始</span>
+            </div>`;
           countdown--;
           _countdownTimer = setTimeout(tick, 1000);
         } else {
-          document.getElementById('word').textContent = '';
+          document.getElementById('word').innerHTML = '';
           if (show_phonetic) document.getElementById('phonetic').textContent = '';
           if (show_cn) document.getElementById('cn').textContent = '';
           cb && cb();
@@ -193,7 +197,16 @@ $font_size = $settings['font_size'] ?? 36;
       total = audioUrls.size;
       if (total === 0) { cb && cb(); return; }
       let tipDiv = document.getElementById('word');
-      tipDiv.innerHTML = '<span class="preload-tip">正在预加载音频，请稍候...</span><div class="preload-bar"><div class="preload-bar-inner" id="preload-bar-inner" style="width:0%"></div></div><div id="preload-bar-text" style="font-size:0.95em;color:orange;margin-top:0.2em;"></div>';
+      tipDiv.innerHTML = `
+        <div class="flex flex-col items-center justify-center gap-4">
+          <div class="animate-spin rounded-full border-8 border-primary-light border-t-primary w-16 h-16 mb-2"></div>
+          <span class="text-primary-dark dark:text-primary-light text-lg font-semibold">正在预加载音频，请稍候...</span>
+          <div class="w-48 h-3 bg-primary-pale rounded-full overflow-hidden mt-2">
+            <div class="h-full bg-gradient-to-r from-primary-dark to-primary-light rounded-full transition-all duration-200" id="preload-bar-inner" style="width:0%"></div>
+          </div>
+          <div id="preload-bar-text" class="text-primary text-base mt-1"></div>
+        </div>
+      `;
       let finished = false;
       let done = () => {
         if (!finished) {
@@ -230,6 +243,7 @@ $font_size = $settings['font_size'] ?? 36;
       }
     }
     function play(idx) {
+      _currentIdx = idx; // 记录当前idx
       if (_pause) {
         _pendingPlay = () => play(idx);
         return;
@@ -347,10 +361,13 @@ $font_size = $settings['font_size'] ?? 36;
         if (_timer) { clearTimeout(_timer); _timer = null; }
       } else {
         btn.textContent = '暂停';
+        // 修复：恢复时如果没有_pendingPlay且未结束，自动继续
         if (_pendingPlay) {
           let fn = _pendingPlay;
           _pendingPlay = null;
           fn();
+        } else if (_currentIdx < total) {
+          play(_currentIdx);
         }
       }
     }

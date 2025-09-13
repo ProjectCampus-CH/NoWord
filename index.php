@@ -73,9 +73,9 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       NoWord - 没词
     </div>
     <div class="flex-1 flex justify-center items-center min-w-0">
-      <input class="rounded-xl border-none px-4 py-2 text-base bg-white text-gray-900 shadow focus:outline-none focus:ring-2 focus:ring-primary-light min-w-[180px] max-w-[320px] w-64 mr-2"
+      <input class="search-box rounded-xl border-none px-4 py-2 text-base bg-white text-gray-900 shadow focus:outline-none focus:ring-2 focus:ring-primary-light min-w-[180px] max-w-[320px] w-64 mr-2"
         type="text" placeholder="搜索方案/单词">
-      <button class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-4 py-2 flex items-center gap-1 font-medium shadow transition-all duration-150">
+      <button class="search-btn bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-4 py-2 flex items-center gap-1 font-medium shadow transition-all duration-150">
         <span class="material-icons">search</span>搜索
       </button>
     </div>
@@ -99,10 +99,19 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
   <div class="mt-4 flex justify-center w-screen">
     <div class="w-[60vw] min-w-[320px] max-w-[1200px] grid grid-cols-3 gap-8 mx-auto
       md:w-[95vw] md:grid-cols-2 sm:w-[99vw] sm:grid-cols-1">
+      <?php if (empty($schemes)): ?>
+        <div class="col-span-3 flex flex-col items-center justify-center py-24">
+          <div class="bg-primary-pale/80 dark:bg-blue-900/80 border border-primary-light rounded-2xl shadow-lg px-10 py-8 text-center max-w-xl">
+            <span class="material-icons text-5xl text-primary-dark mb-4">info</span>
+            <div class="text-xl font-bold text-primary-dark dark:text-primary-light mb-2">暂无方案</div>
+            <div class="text-gray-700 dark:text-blue-100 text-base">请联系管理员在后台添加词汇方案后再来体验。</div>
+          </div>
+        </div>
+      <?php endif; ?>
       <?php foreach ($schemes as $s): ?>
-      <div class="bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-8 min-w-[180px] mb-6 border border-primary-light hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-200 flex flex-col backdrop-blur-md">
-        <div class="text-lg font-bold text-primary-dark dark:text-primary-light mb-2"><?= htmlspecialchars($s['name']) ?></div>
-        <div class="flex-1 text-gray-700 dark:text-blue-100 mb-6 text-base break-words">
+      <div class="bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-8 min-w-[180px] mb-6 border border-primary-light hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-200 flex flex-col backdrop-blur-md card" data-title="<?= htmlspecialchars($s['name']) ?>" data-words="<?= htmlspecialchars(implode(' ', array_column(json_decode($s['data'] ?? '', true)['words'] ?? [], 'word'))) ?>">
+        <div class="text-lg font-bold text-primary-dark dark:text-primary-light mb-2 card-title"><?= htmlspecialchars($s['name']) ?></div>
+        <div class="flex-1 text-gray-700 dark:text-blue-100 mb-6 text-base break-words card-desc">
           <?php
             $data = json_decode($s['data'] ?? '', true);
             if (isset($data['words']) && is_array($data['words'])) {
@@ -146,21 +155,23 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       function doSearch() {
         const kw = searchInput.value.trim().toLowerCase();
         cards.forEach(card => {
-          const title = card.querySelector('.card-title').textContent.toLowerCase();
-          const desc = card.querySelector('.card-desc').textContent.toLowerCase();
-          if (!kw || title.includes(kw) || desc.includes(kw)) {
+          const title = card.getAttribute('data-title')?.toLowerCase() || '';
+          const words = card.getAttribute('data-words')?.toLowerCase() || '';
+          if (!kw || title.includes(kw) || words.includes(kw)) {
             card.style.display = '';
           } else {
             card.style.display = 'none';
           }
         });
       }
-      searchBtn.addEventListener('click', doSearch);
-      searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          doSearch();
-        }
-      });
+      if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', doSearch);
+        searchInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            doSearch();
+          }
+        });
+      }
     });
   </script>
 </body>
