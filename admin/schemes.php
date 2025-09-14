@@ -96,7 +96,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>方案管理 - NoWord</title>
+  <title>方案管理 - ComboWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -121,7 +121,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
   <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
     <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
       <span class="material-icons text-2xl">library_books</span>
-      方案管理 - NoWord
+      方案管理 - ComboWord
     </div>
     <div class="flex-1 flex justify-center items-center min-w-0">
       <a href="/admin/index.php" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">admin_panel_settings</span>后台首页</a>
@@ -146,15 +146,25 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
       <table class="w-full border-collapse rounded-xl shadow bg-white dark:bg-blue-950">
         <thead>
           <tr>
-            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[40%]">方案名称</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[30%]">方案名称</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[15%]">模式</th>
             <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[20%]">创建时间</th>
-            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[40%]">操作</th>
+            <th class="py-2 px-3 text-primary-dark dark:text-primary-light bg-primary-pale font-semibold w-[35%]">操作</th>
           </tr>
         </thead>
         <tbody>
-        <?php foreach ($schemes as $s): ?>
+        <?php foreach ($schemes as $s): 
+          $data = json_decode($s['data'] ?? '', true);
+          $mode = $data['settings']['mode'] ?? 'present';
+        ?>
           <tr class="hover:bg-primary-pale/70">
             <td class="py-2 px-3"><?= htmlspecialchars($s['name']) ?></td>
+            <td class="py-2 px-3">
+              <span class="inline-block px-3 py-1 rounded-full font-bold
+                <?= $mode === 'present' ? 'bg-primary-light text-primary-dark' : 'bg-green-200 text-green-800' ?>">
+                <?= $mode === 'present' ? '领读' : '消消乐' ?>
+              </span>
+            </td>
             <td class="py-2 px-3"><?= htmlspecialchars($s['created_at']) ?></td>
             <td class="py-2 px-3 flex flex-wrap gap-2 items-center">
               <form method="post" class="inline">

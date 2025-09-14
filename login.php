@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>登录 - NoWord</title>
+  <title>登录 - ComboWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="w-full" id="announcement-box"></div>
     </div>
     <form class="w-[340px] min-w-[260px] max-w-[400px] m-0 ml-0 mr-[6vw] p-10 pt-10 pb-8 rounded-3xl shadow-xl bg-white/95 dark:bg-blue-950/90 flex flex-col gap-4 border border-primary-light self-center backdrop-blur-md" method="post" autocomplete="off">
-      <h2 class="mb-2 text-primary-dark tracking-wide font-bold text-center text-2xl">NoWord 登录</h2>
+      <h2 class="mb-2 text-primary-dark tracking-wide font-bold text-center text-2xl">ComboWord 登录</h2>
       <label class="font-medium mb-1 text-primary-dark dark:text-primary-light">用户名</label>
       <input type="text" name="username" required class="w-full px-3 py-2 mb-2 border border-primary-light dark:border-primary-dark rounded-lg bg-primary-pale dark:bg-blue-900 text-base focus:border-primary-dark focus:bg-white dark:focus:bg-blue-950 focus:outline-none">
       <label class="font-medium mb-1 text-primary-dark dark:text-primary-light">密码</label>

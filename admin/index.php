@@ -54,7 +54,7 @@ try {
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>后台管理 - NoWord</title>
+  <title>后台管理 - ComboWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -79,7 +79,7 @@ try {
   <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
     <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
       <span class="material-icons text-2xl">admin_panel_settings</span>
-      NoWord 后台
+      ComboWord 后台
     </div>
     <div class="flex-1 flex justify-center items-center min-w-0">
       <a href="/" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">home</span>回到首页</a>
@@ -106,7 +106,7 @@ try {
       </div>
       <div class="bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-10 min-w-[220px] mb-6 border border-primary-light hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-200 flex flex-col backdrop-blur-md">
         <div class="text-xl font-bold text-primary-dark dark:text-primary-light mb-3 flex items-center gap-2"><span class="material-icons">home</span> 返回主页</div>
-        <div class="flex-1 text-gray-700 dark:text-blue-100 mb-8 text-base break-words">回到 NoWord 首页，查看和开始放映方案。</div>
+        <div class="flex-1 text-gray-700 dark:text-blue-100 mb-8 text-base break-words">回到 ComboWord 首页，查看和开始放映方案。</div>
         <a class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-7 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150 justify-center" href="/"><span class="material-icons">arrow_forward</span>返回</a>
       </div>
     </div>

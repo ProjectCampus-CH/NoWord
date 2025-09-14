@@ -44,7 +44,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>NoWord 主页</title>
+  <title>ComboWord 主页</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -70,7 +70,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
   <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
     <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
       <span class="material-icons text-2xl">auto_stories</span>
-      NoWord - 没词
+      ComboWord - 拼好词
     </div>
     <div class="flex-1 flex justify-center items-center min-w-0">
       <input class="search-box rounded-xl border-none px-4 py-2 text-base bg-white text-gray-900 shadow focus:outline-none focus:ring-2 focus:ring-primary-light min-w-[180px] max-w-[320px] w-64 mr-2"
@@ -108,12 +108,19 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
           </div>
         </div>
       <?php endif; ?>
-      <?php foreach ($schemes as $s): ?>
-      <div class="bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-8 min-w-[180px] mb-6 border border-primary-light hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-200 flex flex-col backdrop-blur-md card" data-title="<?= htmlspecialchars($s['name']) ?>" data-words="<?= htmlspecialchars(implode(' ', array_column(json_decode($s['data'] ?? '', true)['words'] ?? [], 'word'))) ?>">
-        <div class="text-lg font-bold text-primary-dark dark:text-primary-light mb-2 card-title"><?= htmlspecialchars($s['name']) ?></div>
+      <?php foreach ($schemes as $s): 
+        $data = json_decode($s['data'] ?? '', true);
+        $mode = $data['settings']['mode'] ?? 'present';
+      ?>
+      <div class="bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-8 min-w-[180px] mb-6 border border-primary-light hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-200 flex flex-col backdrop-blur-md card" data-title="<?= htmlspecialchars($s['name']) ?>" data-words="<?= htmlspecialchars(implode(' ', array_column($data['words'] ?? [], 'word'))) ?>">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="text-lg font-bold text-primary-dark dark:text-primary-light card-title"><?= htmlspecialchars($s['name']) ?></div>
+          <span class="inline-block px-3 py-1 rounded-full font-bold text-xs <?= $mode === 'present' ? 'bg-primary-light text-primary-dark' : 'bg-green-200 text-green-800' ?>">
+            <?= $mode === 'present' ? '领读' : '消消乐' ?>
+          </span>
+        </div>
         <div class="flex-1 text-gray-700 dark:text-blue-100 mb-6 text-base break-words card-desc">
           <?php
-            $data = json_decode($s['data'] ?? '', true);
             if (isset($data['words']) && is_array($data['words'])) {
               $words = array_column($data['words'], 'word');
               echo htmlspecialchars(implode('、', $words));
@@ -122,7 +129,10 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
             }
           ?>
         </div>
-        <a class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-6 py-2 flex items-center gap-1 font-semibold shadow transition-all duration-150 justify-center" href="/present/index.php?id=<?= $s['id'] ?>"><span class="material-icons">play_circle</span>开始</a>
+        <a class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-6 py-2 flex items-center gap-1 font-semibold shadow transition-all duration-150 justify-center"
+          href="<?= $mode === 'present' ? '/present/index.php?id=' . $s['id'] : '/present/match.php?id=' . $s['id'] ?>">
+          <span class="material-icons"><?= $mode === 'present' ? 'play_circle' : 'sports_esports' ?></span><?= $mode === 'present' ? '开始' : '比拼' ?>
+        </a>
       </div>
       <?php endforeach; ?>
     </div>
@@ -142,7 +152,7 @@ $schemes = $pdo->query("SELECT * FROM schemes ORDER BY id DESC")->fetchAll(PDO::
         let from_who = data.from_who ? ` · ${data.from_who}` : '';
         document.getElementById('bing-header-mask').textContent = text + (from || from_who ? `\n${from}${from_who}` : '');
       } catch(e) {
-        document.getElementById('bing-header-mask').textContent = '欢迎使用 NoWord!';
+        document.getElementById('bing-header-mask').textContent = '欢迎使用 ComboWord!';
       }
     }
     window.addEventListener('DOMContentLoaded', function() {

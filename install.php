@@ -9,7 +9,7 @@ function render_form($db_type = '', $mysql = [], $sqlite = '', $admin = []) {
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>NoWord 初始化</title>
+  <title>ComboWord 初始化</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/@material/web@1.0.0/dist/material-web.min.css">
   <style>
@@ -119,7 +119,7 @@ function render_form($db_type = '', $mysql = [], $sqlite = '', $admin = []) {
 </head>
 <body>
   <form class="card" method="post" autocomplete="off">
-    <h2>NoWord 初始化</h2>
+    <h2>ComboWord 初始化</h2>
     <label>数据库类型</label>
     <select name="db_type" id="db_type" onchange="onDbTypeChange()" required>
       <option value="">请选择</option>
@@ -140,7 +140,7 @@ function render_form($db_type = '', $mysql = [], $sqlite = '', $admin = []) {
       <label>SQLite 文件路径</label>
       <input type="text" name="sqlite_path" value="<?= htmlspecialchars($sqlite) ?>" <?= $db_type==='sqlite'?'required':'' ?>>
       <div class="tip">
-        建议 SQLite 路径使用绝对路径或 <b>./data/xxx.db</b>，如 <b>./data/noword.db</b>，确保 PHP 有写入权限。
+        建议 SQLite 路径使用绝对路径或 <b>./data/xxx.db</b>，如 <b>./data/ComboWord.db</b>，确保 PHP 有写入权限。
       </div>
     </div>
     <hr>

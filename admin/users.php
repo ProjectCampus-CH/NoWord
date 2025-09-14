@@ -98,7 +98,7 @@ $users = $pdo->query("SELECT id,username,role FROM users ORDER BY id ASC")->fetc
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>用户管理 - NoWord</title>
+  <title>用户管理 - ComboWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>

@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     'shuffle' => !empty($_POST['shuffle']),
     'show_phonetic' => !empty($_POST['show_phonetic']),
     'font_size' => intval($_POST['font_size'] ?? 36),
+    'mode' => $_POST['mode'] ?? 'present', // 新增
   ];
   $words = [];
   if (isset($_POST['word']) && is_array($_POST['word'])) {
@@ -79,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 $data = json_decode($scheme['data'], true);
 $settings = $data['settings'] ?? [];
 $words = $data['words'] ?? [];
+$mode = $settings['mode'] ?? 'present';
 
 // 判断登录状态
 $user = null;
@@ -92,7 +94,7 @@ if (isset($_SESSION['user_id'])) {
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>编辑方案 - NoWord</title>
+  <title>编辑方案 - ComboWord</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -322,7 +324,7 @@ if (isset($_SESSION['user_id'])) {
   <div class="fixed top-0 left-0 right-0 h-16 bg-primary text-white flex items-center justify-between z-50 shadow-lg px-8 backdrop-blur-md">
     <div class="flex items-center gap-3 font-extrabold text-2xl tracking-wide select-none">
       <span class="material-icons text-2xl">auto_stories</span>
-      NoWord - 没词
+      ComboWord - 拼好词
     </div>
     <div class="flex-1 flex justify-center items-center min-w-0">
       <a href="/" class="bg-primary-dark hover:bg-primary-light hover:text-primary-dark text-white rounded-xl px-5 py-2 flex items-center gap-2 font-semibold shadow transition-all duration-150"><span class="material-icons">home</span>回到首页</a>
@@ -338,7 +340,16 @@ if (isset($_SESSION['user_id'])) {
   </div>
   <!-- 页面内容 -->
   <div class="w-[80vw] max-w-[1200px] min-w-[320px] mx-auto mt-24 mb-8 bg-white/90 dark:bg-blue-950/80 rounded-3xl shadow-xl p-10 border border-primary-light backdrop-blur-md">
-    <h2 class="text-2xl font-bold text-primary-dark dark:text-primary-light text-center mb-8">编辑方案</h2>
+    <div class="flex flex-wrap items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold text-primary-dark dark:text-primary-light text-center">编辑方案</h2>
+      <div class="flex gap-2 items-center">
+        <span class="font-semibold text-primary-dark dark:text-primary-light">当前模式：</span>
+        <span class="inline-block px-3 py-1 rounded-full font-bold
+          <?= $mode === 'present' ? 'bg-primary-light text-primary-dark' : 'bg-green-200 text-green-800' ?>">
+          <?= $mode === 'present' ? '领读' : '消消乐' ?>
+        </span>
+      </div>
+    </div>
     <a href="schemes.php" class="inline-block mb-4 text-primary-dark hover:text-primary-light underline">← 返回方案管理</a>
     <?php if ($msg): ?><div class="mb-4 p-3 rounded-lg text-base text-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-primary-light dark:border-primary-dark"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data">
@@ -347,7 +358,15 @@ if (isset($_SESSION['user_id'])) {
         <div class="flex flex-wrap gap-8 items-center">
           <label class="font-medium text-primary-dark dark:text-primary-light">方案名称 <input type="text" name="name" value="<?= htmlspecialchars($scheme['name']) ?>" required class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none"></label>
           <label class="font-medium text-primary-dark dark:text-primary-light">字号 <input type="number" name="font_size" value="<?= htmlspecialchars($settings['font_size'] ?? 36) ?>" min="12" max="120" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
+          <label class="font-medium text-primary-dark dark:text-primary-light">模式
+            <select name="mode" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none"
+              onchange="this.form.appendChild(Object.assign(document.createElement('input'),{type:'hidden',name:'save',value:'1'}));this.form.submit();">
+              <option value="present" <?= $mode==='present'?'selected':'' ?>>领读</option>
+              <option value="match" <?= $mode==='match'?'selected':'' ?>>消消乐</option>
+            </select>
+          </label>
         </div>
+        <?php if ($mode === 'present'): ?>
         <div class="flex flex-wrap gap-8 items-center">
           <label class="font-medium text-primary-dark dark:text-primary-light">轮数 <input type="number" name="rounds" value="<?= htmlspecialchars($settings['rounds'] ?? 1) ?>" min="1" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
           <label class="font-medium text-primary-dark dark:text-primary-light">每词重复 <input type="number" name="repeat" value="<?= htmlspecialchars($settings['repeat'] ?? 1) ?>" min="1" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-20"></label>
@@ -358,6 +377,16 @@ if (isset($_SESSION['user_id'])) {
           <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="shuffle" value="1" <?= !empty($settings['shuffle'])?'checked':'' ?> class="mr-2">乱序</label>
           <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="show_phonetic" value="1" <?= !empty($settings['show_phonetic'])?'checked':'' ?> class="mr-2">显示音标</label>
         </div>
+        <?php else: ?>
+        <div class="flex flex-wrap gap-8 items-center">
+          <label class="font-medium text-primary-dark dark:text-primary-light">消消乐单词数
+            <input type="number" name="match_count" value="<?= htmlspecialchars($settings['match_count'] ?? count($words)) ?>" min="2" max="<?= count($words) ?>" class="ml-2 px-3 py-2 border border-primary-light rounded-lg bg-white focus:border-primary-dark focus:outline-none w-24">
+            <span class="text-sm text-gray-500 ml-2">（最多<?= count($words) ?>，建议偶数）</span>
+          </label>
+          <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="match_audio" value="1" <?= !empty($settings['match_audio'])?'checked':'' ?> class="mr-2">点击单词播放音频</label>
+          <label class="font-medium text-primary-dark dark:text-primary-light"><input type="checkbox" name="match_show_phonetic" value="1" <?= !empty($settings['match_show_phonetic'])?'checked':'' ?> class="mr-2">中文卡片显示音标</label>
+        </div>
+        <?php endif; ?>
       </div>
       <div class="flex gap-6 items-center mb-6">
         <label class="font-medium text-primary-dark dark:text-primary-light">获取方式：</label>
