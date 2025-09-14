@@ -11,165 +11,287 @@ function render_form($db_type = '', $mysql = [], $sqlite = '', $admin = []) {
   <meta charset="UTF-8">
   <title>ComboWord 初始化</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/@material/web@1.0.0/dist/material-web.min.css">
-  <style>
-    body {
-      background: linear-gradient(135deg, #e8f5e9 0%, #f5fff5 100%);
-      color: #222;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, sans-serif;
-    }
-    .card {
-      max-width: 440px;
-      margin: 2rem;
-      padding: 2.5rem 2rem 2rem 2rem;
-      border-radius: 20px;
-      box-shadow: 0 4px 24px rgba(56,142,60,0.13);
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 1.1em;
-      border: 1px solid #e0f2f1;
-    }
-    h2 {
-      margin-bottom: 0.5em;
-      color: #388e3c;
-      letter-spacing: 0.05em;
-      font-weight: 700;
-      text-align: center;
-    }
-    label {
-      font-weight: 500;
-      margin-bottom: 0.2em;
-      color: #388e3c;
-      display: block;
-    }
-    input[type="text"], input[type="password"], select {
-      width: 100%;
-      padding: 0.6em 0.8em;
-      margin-bottom: 0.7em;
-      border: 1px solid #c8e6c9;
-      border-radius: 8px;
-      background: #f9fff9;
-      font-size: 1em;
-      transition: border 0.2s;
-    }
-    input:focus, select:focus {
-      border: 1.5px solid #388e3c;
-      outline: none;
-      background: #fff;
-    }
-    button[type="submit"] {
-      margin-top: 1rem;
-      background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);
-      color: #fff;
-      border: none;
-      padding: 0.8em 2em;
-      border-radius: 10px;
-      font-size: 1.1em;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      box-shadow: 0 2px 8px rgba(56,142,60,0.10);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button[type="submit"]:hover {
-      background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #e0e0e0;
-      margin: 1.2em 0;
-    }
-    .msg {
-      margin-top: 1em;
-      padding: 0.7em 1em;
-      border-radius: 8px;
-      font-size: 1em;
-      text-align: center;
-    }
-    .msg.error {
-      background: #ffebee;
-      color: #c62828;
-      border: 1px solid #ffcdd2;
-    }
-    .msg.success {
-      background: #e8f5e9;
-      color: #388e3c;
-      border: 1px solid #c8e6c9;
-    }
-    .tip {
-      color: #888;
-      font-size: 0.97em;
-      margin-bottom: 0.5em;
-      margin-top: -0.5em;
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: linear-gradient(135deg, #1a1f1a 0%, #263238 100%); color: #eee; }
-      .card { background: #232d23; border: 1px solid #37474f; }
-      input, select { background: #232d23; color: #eee; border: 1px solid #37474f; }
-      input:focus, select:focus { background: #263238; border: 1.5px solid #66bb6a; }
-      .msg.success { background: #263238; color: #66bb6a; border: 1px solid #388e3c; }
-      .msg.error { background: #2d2323; color: #ff8a80; border: 1px solid #c62828; }
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            dark: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            },
+          },
+          animation: {
+            'gradient-x': 'gradient-x 8s ease infinite',
+            'gradient-y': 'gradient-y 8s ease infinite',
+            'gradient-xy': 'gradient-xy 8s ease infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            'gradient-x': {
+              '0%, 100%': {
+                'background-size': '200% 200%',
+                'background-position': 'left center',
+              },
+              '50%': {
+                'background-size': '200% 200%',
+                'background-position': 'right center',
+              },
+            },
+            'gradient-y': {
+              '0%, 100%': {
+                'background-size': '400% 400%',
+                'background-position': 'center top',
+              },
+              '50%': {
+                'background-size': '400% 400%',
+                'background-position': 'center bottom',
+              },
+            },
+            'gradient-xy': {
+              '0%, 100%': {
+                'background-size': '400% 400%',
+                'background-position': 'left center',
+              },
+              '50%': {
+                'background-size': '400% 400%',
+                'background-position': 'right center',
+              },
+            },
+            'float': {
+              '0%, 100%': {
+                transform: 'translateY(0)',
+              },
+              '50%': {
+                transform: 'translateY(-10px)',
+              },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <!-- Animate.css for additional animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style type="text/tailwindcss">
+    @layer components {
+      .input-tech {
+        @apply w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 ease-in-out;
+      }
+      .select-tech {
+        @apply appearance-none w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 ease-in-out;
+      }
+      .btn-gradient {
+        @apply bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white font-bold py-3 px-6 rounded-lg capitalize shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 ease-in-out animate-gradient-x bg-[length:200%_200%];
+      }
+      .btn-gradient:active {
+        @apply scale-95;
+      }
     }
   </style>
 </head>
-<body>
-  <form class="card" method="post" autocomplete="off">
-    <h2>ComboWord 初始化</h2>
-    <label>数据库类型</label>
-    <select name="db_type" id="db_type" onchange="onDbTypeChange()" required>
-      <option value="">请选择</option>
-      <option value="mysql" <?= $db_type==='mysql'?'selected':'' ?>>MySQL</option>
-      <option value="sqlite" <?= $db_type==='sqlite'?'selected':'' ?>>SQLite</option>
-    </select>
-    <div id="mysql_fields" style="display:<?= $db_type==='mysql'?'block':'none' ?>">
-      <label>MySQL 主机</label>
-      <input type="text" name="mysql_host" value="<?= htmlspecialchars($mysql['host']??'localhost') ?>" <?= $db_type==='mysql'?'required':'' ?>>
-      <label>MySQL 数据库名</label>
-      <input type="text" name="mysql_db" value="<?= htmlspecialchars($mysql['db']??'') ?>" <?= $db_type==='mysql'?'required':'' ?>>
-      <label>MySQL 用户名</label>
-      <input type="text" name="mysql_user" value="<?= htmlspecialchars($mysql['user']??'') ?>" <?= $db_type==='mysql'?'required':'' ?>>
-      <label>MySQL 密码</label>
-      <input type="password" name="mysql_pass" value="<?= htmlspecialchars($mysql['pass']??'') ?>">
+<body class="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900 dark:to-gray-800 min-h-screen flex items-center justify-center p-4">
+  <form 
+    class="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-8 max-w-md w-full mx-auto border border-gray-200 dark:border-gray-700 animate__animated animate__fadeIn"
+    method="post" 
+    autocomplete="off"
+  >
+    <h2 class="text-3xl font-bold text-center mb-8 text-primary-600 dark:text-primary-400 animate-[float_6s_ease-in-out_infinite]">
+      ComboWord 初始化
+    </h2>
+    
+    <div class="mb-6">
+      <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">数据库类型</label>
+      <select 
+        name="db_type" 
+        id="db_type" 
+        onchange="onDbTypeChange()" 
+        required
+        class="select-tech"
+      >
+        <option value="">请选择</option>
+        <option value="mysql" <?= $db_type==='mysql'?'selected':'' ?>>MySQL</option>
+        <option value="sqlite" <?= $db_type==='sqlite'?'selected':'' ?>>SQLite</option>
+      </select>
     </div>
-    <div id="sqlite_fields" style="display:<?= $db_type==='sqlite'?'block':'none' ?>">
-      <label>SQLite 文件路径</label>
-      <input type="text" name="sqlite_path" value="<?= htmlspecialchars($sqlite) ?>" <?= $db_type==='sqlite'?'required':'' ?>>
-      <div class="tip">
-        建议 SQLite 路径使用绝对路径或 <b>./data/xxx.db</b>，如 <b>./data/ComboWord.db</b>，确保 PHP 有写入权限。
+    
+    <div 
+      id="mysql_fields" 
+      class="space-y-4 mb-6 <?= $db_type==='mysql'?'block':'hidden' ?> transition-all duration-500 ease-in-out"
+    >
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">MySQL 主机</label>
+        <input 
+          type="text" 
+          name="mysql_host" 
+          value="<?= htmlspecialchars($mysql['host']??'localhost') ?>" 
+          <?= $db_type==='mysql'?'required':'' ?>
+          class="input-tech"
+        >
+      </div>
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">MySQL 数据库名</label>
+        <input 
+          type="text" 
+          name="mysql_db" 
+          value="<?= htmlspecialchars($mysql['db']??'') ?>" 
+          <?= $db_type==='mysql'?'required':'' ?>
+          class="input-tech"
+        >
+      </div>
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">MySQL 用户名</label>
+        <input 
+          type="text" 
+          name="mysql_user" 
+          value="<?= htmlspecialchars($mysql['user']??'') ?>" 
+          <?= $db_type==='mysql'?'required':'' ?>
+          class="input-tech"
+        >
+      </div>
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">MySQL 密码</label>
+        <input 
+          type="password" 
+          name="mysql_pass" 
+          value="<?= htmlspecialchars($mysql['pass']??'') ?>"
+          class="input-tech"
+        >
       </div>
     </div>
-    <hr>
-    <label>站长用户名</label>
-    <input type="text" name="admin_user" value="<?= htmlspecialchars($admin['user']??'') ?>" required>
-    <label>站长密码</label>
-    <input type="password" name="admin_pass" required>
-    <button type="submit">初始化</button>
+    
+    <div 
+      id="sqlite_fields" 
+      class="space-y-4 mb-6 <?= $db_type==='sqlite'?'block':'hidden' ?> transition-all duration-500 ease-in-out"
+    >
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">SQLite 文件路径</label>
+        <input 
+          type="text" 
+          name="sqlite_path" 
+          value="<?= htmlspecialchars($sqlite) ?>" 
+          <?= $db_type==='sqlite'?'required':'' ?>
+          class="input-tech"
+        >
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">
+          建议 SQLite 路径使用绝对路径或 <span class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">./data/xxx.db</span>，如 <span class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">./data/ComboWord.db</span>，确保 PHP 有写入权限。
+        </p>
+      </div>
+    </div>
+    
+    <div class="relative py-6">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+      </div>
+      <div class="relative flex justify-center">
+        <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm uppercase tracking-wider">管理员设置</span>
+      </div>
+    </div>
+    
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">站长用户名</label>
+        <input 
+          type="text" 
+          name="admin_user" 
+          value="<?= htmlspecialchars($admin['user']??'') ?>" 
+          required
+          class="input-tech"
+        >
+      </div>
+      <div>
+        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm uppercase tracking-wider">站长密码</label>
+        <input 
+          type="password" 
+          name="admin_pass" 
+          required
+          class="input-tech"
+        >
+      </div>
+    </div>
+    
+    <button type="submit" class="btn-gradient w-full">
+      初始化
+    </button>
+    
     <?php if (!empty($GLOBALS['error'])): ?>
-      <div class="msg error"><?= htmlspecialchars($GLOBALS['error']) ?></div>
+      <div class="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300 rounded animate__animated animate__headShake">
+        <?= htmlspecialchars($GLOBALS['error']) ?>
+      </div>
     <?php elseif (!empty($GLOBALS['success'])): ?>
-      <div class="msg success"><?= htmlspecialchars($GLOBALS['success']) ?></div>
+      <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 text-green-700 dark:text-green-300 rounded animate__animated animate__rubberBand">
+        <?= htmlspecialchars($GLOBALS['success']) ?>
+      </div>
     <?php endif; ?>
   </form>
+  
   <script>
     function onDbTypeChange() {
-      var type = document.getElementById('db_type').value;
-      document.getElementById('mysql_fields').style.display = type === 'mysql' ? 'block' : 'none';
-      document.getElementById('sqlite_fields').style.display = type === 'sqlite' ? 'block' : 'none';
-      document.querySelectorAll('#mysql_fields input').forEach(i=>i.required = (type==='mysql'));
-      document.querySelectorAll('#sqlite_fields input').forEach(i=>i.required = (type==='sqlite'));
+      const type = document.getElementById('db_type').value;
+      const mysqlFields = document.getElementById('mysql_fields');
+      const sqliteFields = document.getElementById('sqlite_fields');
+      
+      // Animate fields
+      if (type === 'mysql') {
+        mysqlFields.classList.remove('hidden');
+        mysqlFields.classList.add('block');
+        sqliteFields.classList.remove('block');
+        sqliteFields.classList.add('hidden');
+      } else if (type === 'sqlite') {
+        sqliteFields.classList.remove('hidden');
+        sqliteFields.classList.add('block');
+        mysqlFields.classList.remove('block');
+        mysqlFields.classList.add('hidden');
+      }
+      
+      // Set required fields
+      document.querySelectorAll('#mysql_fields input').forEach(i => i.required = (type === 'mysql'));
+      document.querySelectorAll('#sqlite_fields input').forEach(i => i.required = (type === 'sqlite'));
     }
+    
     window.onload = onDbTypeChange;
+    
+    // Add focus effect labels
+    document.querySelectorAll('.input-tech, .select-tech').forEach(input => {
+      const label = input.previousElementSibling;
+      if (label && label.tagName === 'LABEL') {
+        input.addEventListener('focus', () => {
+          label.classList.add('text-primary-500', 'dark:text-primary-400');
+        });
+        input.addEventListener('blur', () => {
+          label.classList.remove('text-primary-500', 'dark:text-primary-400');
+        });
+      }
+    });
   </script>
 </body>
 </html>
 <?php
 }
 
+// 以下是原始PHP逻辑保持不变...
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $db_type = $_POST['db_type'] ?? '';
   $admin_user = trim($_POST['admin_user'] ?? '');
